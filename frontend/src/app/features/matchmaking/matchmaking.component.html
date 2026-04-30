@@ -1,0 +1,49 @@
+<div class="matchmaking-page" role="main">
+  <!-- Fondo decorativo (reutiliza el estilo de la home) -->
+  <div class="bg-particles" aria-hidden="true">
+    <span class="particle particle--1">⚔️</span>
+    <span class="particle particle--2">🛡️</span>
+    <span class="particle particle--3">🏹</span>
+  </div>
+
+  <main class="matchmaking-card">
+    <div class="matchmaking-header">
+      <h1 class="matchmaking-title">Buscando Oponentes</h1>
+      <p class="matchmaking-subtitle">Modo Competitivo (Ranked)</p>
+    </div>
+
+    <!-- Indicador visual circular rústico -->
+    <div class="search-indicator">
+      <div class="indicator-ring">
+        <div class="ring-pulse"></div>
+        <div class="ring-content">
+          <span class="timer-text">{{ getFormattedTime() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información de rango ELO -->
+    <div class="elo-info">
+      <span class="info-label">Rango de búsqueda:</span>
+      <div class="range-display">
+        <span class="range-value">{{ eloRange().min }}</span>
+        <span class="range-separator">↔</span>
+        <span class="range-value">{{ eloRange().max }}</span>
+      </div>
+      <p class="elo-hint">Expandiendo rango ±100 cada 10 segundos...</p>
+    </div>
+
+    <!-- Botón Cancelar -->
+    <div class="actions">
+      <button
+        class="btn-cancel"
+        type="button"
+        (click)="onCancel()"
+        aria-label="Cancelar búsqueda de partida"
+      >
+        <span class="btn-icon">✖</span>
+        <span class="btn-text">Cancelar Búsqueda</span>
+      </button>
+    </div>
+  </main>
+</div>
