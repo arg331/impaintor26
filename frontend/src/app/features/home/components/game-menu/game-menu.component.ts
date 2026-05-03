@@ -54,7 +54,7 @@ export type GameAction = 'create-private' | 'find-ranked';
         <span class="menu-btn__icon" aria-hidden="true">⚔️</span>
         <span class="menu-btn__content">
           <span class="menu-btn__label">Buscar Partida Competitiva</span>
-          <span class="menu-btn__desc">Enfrenta a rivales de tu nivel (ELO)</span>
+          <span class="menu-btn__desc">Enfrenta a rivales de tu nivel</span>
         </span>
         <span class="menu-btn__arrow" aria-hidden="true">›</span>
       </button>

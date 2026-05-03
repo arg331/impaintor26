@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatchmakingService } from '../../core/services/matchmaking.service';
@@ -26,6 +26,21 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
   readonly status = this.matchmakingService.status;
   readonly elapsedSeconds = this.matchmakingService.elapsedSeconds;
   readonly eloRange = this.matchmakingService.eloRange;
+  readonly roomCode = this.matchmakingService.roomCode;
+
+  constructor() {
+    effect(() => {
+      if (this.status() === 'found') {
+        const code = this.roomCode();
+        // Simular un pequeño delay de 2.5 segundos para mostrar la pantalla de "Partida Encontrada"
+        setTimeout(() => {
+          if (code) {
+            this.router.navigate(['/room', code, 'game']);
+          }
+        }, 2500);
+      }
+    });
+  }
 
   ngOnInit(): void {
     const userElo = this.userService.currentUser()?.elo ?? 1000;

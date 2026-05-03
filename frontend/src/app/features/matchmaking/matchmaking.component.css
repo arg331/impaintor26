@@ -185,3 +185,44 @@
   50% { transform: translate(20px, -20px) rotate(10deg); }
   100% { transform: translate(0, 0) rotate(0deg); }
 }
+
+/* ---- Match Found State ---- */
+.match-found-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.match-found-title {
+  font-family: 'Cinzel', serif;
+  font-size: 2.2rem;
+  color: #52b788;
+  text-shadow: 0 0 10px rgba(82, 183, 136, 0.5);
+  margin-bottom: 1.5rem;
+}
+
+.swords-icon {
+  font-size: 4rem;
+  margin: 1.5rem 0;
+  animation: clash 1s infinite alternate;
+}
+
+.match-found-text {
+  font-family: 'Courier New', monospace;
+  color: #f5e6c8;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes clash {
+  from { transform: scale(1) rotate(-5deg); }
+  to { transform: scale(1.2) rotate(5deg); }
+}

@@ -5,6 +5,8 @@ import { MatchmakingComponent } from './features/matchmaking/matchmaking.compone
 export const routes: Routes = [
   { path: 'home', component: HomeComponent },
   { path: 'matchmaking', component: MatchmakingComponent },
+  { path: 'room/:code/lobby', loadComponent: () => import('./features/room/lobby/lobby').then(m => m.Lobby) },
+  { path: 'room/:code/game',  loadComponent: () => import('./features/room/game/game').then(m => m.Game) },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   // Rutas futuras (CLAUDE.md §8.1):
   // { path: 'login',           loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
