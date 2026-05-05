@@ -48,7 +48,21 @@ export class Game implements OnInit, OnDestroy {
 
   // ── Ciclo de vida ───────────────────────────────────────────────────────────
   ngOnInit(): void {
-    // Aquí se conectarían las suscripciones WebSocket en producción
+    // ----------------------------------------------------------------------
+    // [MOCK TEMPORAL] Inyectado temporalmente para poder probar la UI.
+    // Esto se eliminó anteriormente para preparar la app para producción.
+    // ----------------------------------------------------------------------
+    this.gameService.setInitialState({
+      role: 'painter',
+      players: [
+        { id: 1, username: 'Tú', isCurrentUser: true, isDrawingNow: true },
+        { id: 2, username: 'Amigo', isCurrentUser: false, isDrawingNow: false }
+      ],
+      round: 1,
+      timeLeft: 60,
+      word: 'Gato espacial'
+    });
+    // ----------------------------------------------------------------------
   }
 
   ngOnDestroy(): void {

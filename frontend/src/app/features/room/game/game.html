@@ -35,21 +35,24 @@
     <!-- ═══ PALETA DE PINTOR (izquierda) ══════════════════════ -->
     <aside class="palette" aria-label="Jugadores en la sala">
 
-      <!-- Lista de jugadores -->
-      <ul class="player-list" role="list">
-        <li
-          *ngFor="let player of players()"
-          class="player-list__item"
-          [class.player-list__item--me]="player.isCurrentUser"
-          [class.player-list__item--drawing]="player.isDrawingNow"
-          [attr.aria-label]="player.username + (player.isDrawingNow ? ' (dibujando)' : '')"
-        >
-          <span class="player-avatar" aria-hidden="true">
-            {{ player.username.charAt(0).toUpperCase() }}
-          </span>
-          <span class="player-name">{{ player.username }}</span>
-        </li>
-      </ul>
+      <!-- Contenedor de jugadores -->
+      <div class="players-container">
+        <!-- Lista de jugadores -->
+        <ul class="player-list" role="list">
+          <li
+            *ngFor="let player of players()"
+            class="player-list__item"
+            [class.player-list__item--me]="player.isCurrentUser"
+            [class.player-list__item--drawing]="player.isDrawingNow"
+            [attr.aria-label]="player.username + (player.isDrawingNow ? ' (dibujando)' : '')"
+          >
+            <span class="player-avatar" aria-hidden="true">
+              {{ player.username.charAt(0).toUpperCase() }}
+            </span>
+            <span class="player-name">{{ player.username }}</span>
+          </li>
+        </ul>
+      </div>
 
       <!-- Manchas y agujero del pulgar son parte del asset paleta.png -->
     </aside>

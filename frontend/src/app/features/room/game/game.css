@@ -182,94 +182,142 @@ button { font-family: inherit; }
   flex: 1;
   min-height: 0; /* clave para evitar overflow */
   display: flex;
-  align-items: stretch;
-  gap: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
   overflow: hidden;
 }
 
 /* ════════════════════════════════════════════════════════════
-   PALETA DE PINTOR — imagen real del asset
+   PALETA DE PINTOR — Incrustación dinámica
    ════════════════════════════════════════════════════════════ */
 .palette {
   flex-shrink: 0;
-  width: clamp(260px, 32vw, 360px);
-  height: clamp(400px, 70vh, 600px);
-  margin: 1rem 0 1rem 1rem;
-  padding: 4.5rem 2.5rem 5rem 2rem;
+  /* Altura reactiva con proporción ovalada (ancho > alto para paleta realista) */
+  height: clamp(400px, 70vh, 750px);
+  aspect-ratio: 1.3 / 1; /* Ancho 1.3x la altura — forma ovalada más realista */
+  align-self: center; /* Alineación vertical solamente para la paleta */
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
   z-index: 5;
 
-  /* Imagen de la paleta como fondo */
+  /* Perspectiva para que el contenido parezca estar sobre la madera inclinada */
+  perspective: 1200px;
+  filter: drop-shadow(25px 30px 40px rgba(0,0,0,0.7));
+}
+
+/* El asset de la paleta */
+.palette::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   background-image: url('/paleta.png');
   background-size: 100% 100%;
   background-repeat: no-repeat;
   background-position: center;
-  background-color: transparent;
-
-  border: none;
-  filter: drop-shadow(15px 20px 25px rgba(0,0,0,0.6));
+  z-index: 1;
+  pointer-events: none;
 }
 
-/* ── Lista de jugadores (columna izquierda de la paleta) ── */
+/* ── Contenedor envolvedor de la lista (posicionamiento absoluto) ── */
+.players-container {
+  position: absolute;
+  top: 18%;
+  left: 22%;
+  width: 58%;
+  height: 64%;
+  z-index: 2;
+
+  /* Recorta cualquier contenido que se salga de los límites */
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+/* ── Lista de jugadores (flex normal) ── */
 .player-list {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 0.6rem;
+  align-items: center; /* Centra horizontalmente los items */
+  justify-content: center;
+  gap: clamp(0.2rem, 0.8vh, 0.8rem); /* Gap reducido */
+  padding: 0.5rem 0; /* Padding vertical reducido, horizontal eliminado */
+  height: 100%;
   width: 100%;
-  position: relative;
-  z-index: 2;
+
+  /* Rotación 3D para casar con la inclinación de la paleta del asset */
+  transform: rotateY(15deg) rotateX(5deg) rotateZ(-2deg);
+  transform-style: preserve-3d;
 }
 
 .player-list__item {
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  font-size: clamp(0.8rem, 1.5vw, 1.1rem);
-  color: #1a0e06;
+  font-size: clamp(0.85rem, 1.4vw, 1.2rem);
+
+  /* Mix-blend-mode hace que el color se funda con la textura de la madera del fondo */
+  mix-blend-mode: multiply;
+  opacity: 0.9;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.player-list__item:hover {
+  transform: translateZ(20px) scale(1.05);
+  opacity: 1;
 }
 
 .player-avatar {
-  width: clamp(30px, 3.5vw, 40px);
-  height: clamp(30px, 3.5vw, 40px);
+  width: clamp(28px, 3.2vw, 42px);
+  height: clamp(28px, 3.2vw, 42px);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(0.8rem, 1.2vw, 1rem);
-  font-weight: 700;
+  font-size: clamp(0.7rem, 1vw, 1.1rem);
+  font-weight: 800;
   color: #fff;
   flex-shrink: 0;
+
+  /* Efecto de "mancha de pintura" seca */
   box-shadow:
-    inset -3px -3px 5px rgba(0,0,0,0.35),
-    inset 2px 2px 5px rgba(255,255,255,0.45),
-    2px 3px 7px rgba(0,0,0,0.35);
+    1px 2px 4px rgba(0,0,0,0.3),
+    inset -2px -2px 4px rgba(0,0,0,0.2);
+  border: 2px solid rgba(255,255,255,0.2);
 }
 
-.player-list__item:nth-child(1)   .player-avatar { background: #2471d8; }
-.player-list__item:nth-child(2)   .player-avatar { background: #1fa060; }
-.player-list__item:nth-child(3)   .player-avatar { background: #7030a0; }
-.player-list__item:nth-child(4)   .player-avatar { background: #cc3322; }
-.player-list__item:nth-child(5)   .player-avatar { background: #dd7010; }
-.player-list__item:nth-child(6)   .player-avatar { background: #147070; }
-.player-list__item:nth-child(7)   .player-avatar { background: #7a4018; }
-.player-list__item:nth-child(8)   .player-avatar { background: #2471d8; }
-.player-list__item:nth-child(n+9) .player-avatar { background: #666; }
+/* Colores de "témpera" orgánica */
+.player-list__item:nth-child(1) .player-avatar { background: #2c3e50; }
+.player-list__item:nth-child(2) .player-avatar { background: #27ae60; }
+.player-list__item:nth-child(3) .player-avatar { background: #8e44ad; }
+.player-list__item:nth-child(4) .player-avatar { background: #c0392b; }
+.player-list__item:nth-child(5) .player-avatar { background: #d35400; }
 
 .player-name {
+  font-family: 'Caveat', cursive;
+  font-size: 1.4em;
+  font-weight: 700;
+  color: #2c1608;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
-  font-weight: 600;
-  color: #2c1608;
+  /* Parece escrito a mano sobre la madera */
+  filter: sepia(0.3) contrast(1.2);
 }
 
-.player-list__item--me      .player-name { font-weight: 700; }
+.player-list__item--me .player-name {
+  text-decoration: underline wavy #e67e22;
+}
+
+.player-list__item--drawing .player-avatar {
+  animation: drip 2s infinite;
+  box-shadow: 0 0 15px rgba(230, 126, 34, 0.5);
+}
+
+@keyframes drip {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.player-list__item--me       .player-name { font-weight: 700; }
 .player-list__item--drawing .player-name { color: #8b1208; }
 .player-list__item--drawing .player-avatar {
   outline: 2.5px solid #e84a30;
@@ -282,7 +330,7 @@ button { font-family: inherit; }
    ZONA CENTRAL: palabra/pista + lienzo + turno
    ════════════════════════════════════════════════════════════ */
 .game-main {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -359,14 +407,14 @@ button { font-family: inherit; }
 
 .canvas-placeholder {
   /* Tamaño relativo al viewport, preserva aspect-ratio 4:3 */
-  width: clamp(280px, 46vw, 640px);
+  width: clamp(320px, 55vw, 750px);
   aspect-ratio: 4 / 3;
   background: #f5f0e4;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: inset 0 3px 14px rgba(0,0,0,0.2);
-  max-height: 55vh; /* nunca supera el 55% del alto de pantalla */
+  max-height: 65vh; /* nunca supera el 65% del alto de pantalla */
 }
 
 .turn-indicator {

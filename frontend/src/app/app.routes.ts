@@ -4,9 +4,18 @@ import { HomeLandingComponent } from './features/auth/home-landing/home-landing.
 import { LoginComponent } from './features/auth/login.component';
 import { RegisterComponent } from './features/auth/register.component';
 
+import { HomeComponent } from './features/home/home.component';
+import { MatchmakingComponent } from './features/matchmaking/matchmaking.component';
+import { CreateRoomComponent } from './features/room/create/create-room.component';
+import { Game } from './features/room/game/game';
+
 export const routes: Routes = [
-  { path: '', component: HomeLandingComponent },
+  { path: '', component: HomeLandingComponent, pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: '**', redirectTo: '' }
+  { path: 'main_menu', component: HomeComponent },
+  { path: 'matchmaking', component: MatchmakingComponent },
+  { path: 'room/create', component: CreateRoomComponent },
+  { path: 'room/:code/game', component: Game },
+  // { path: \x27\x2A\x2A\x27, redirectTo: \x27\x27 }
 ];

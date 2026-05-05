@@ -3,12 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatchmakingService } from '../../core/services/matchmaking.service';
 import { UserService } from '../../core/services/user.service';
+import { AudioService } from '../../core/services/audio.service';
 
 /**
  * MatchmakingComponent — Pantalla de búsqueda de partida competitiva.
- *
- * SRP: gestiona la UI de la cola de espera y la navegación al cancelar.
- * ISO 25010 — Usabilidad: retroalimentación visual clara del progreso (tiempo y rango).
  */
 @Component({
   selector: 'app-matchmaking',
@@ -21,6 +19,7 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
   private readonly matchmakingService = inject(MatchmakingService);
   private readonly userService = inject(UserService);
   private readonly router = inject(Router);
+  private readonly audioService = inject(AudioService);
 
   // Exponemos las señales al template
   readonly status = this.matchmakingService.status;
@@ -40,6 +39,9 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Iniciar música de matchmaking
+    this.audioService.play('/music/matchmaking.mp3');
+
     const userElo = this.userService.currentUser()?.elo ?? 1000;
     this.matchmakingService.startSearch(userElo);
   }
@@ -54,10 +56,13 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
 
   onCancel(): void {
     this.matchmakingService.cancelSearch();
-    this.router.navigate(['/home']);
+    this.router.navigate(['/main_menu']);
   }
 
   ngOnDestroy(): void {
+    // Detener música al salir
+    this.audioService.stop();
+
     // Aseguramos que la búsqueda se detiene si el componente se destruye
     if (this.status() === 'searching') {
       this.matchmakingService.cancelSearch();
