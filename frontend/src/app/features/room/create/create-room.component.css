@@ -164,3 +164,46 @@ label {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ── Tablet pequeña (≤ 768px) ─────────────────────────────── */
+@media (max-width: 768px) {
+  .create-room-container {
+    padding: 1.5rem;
+  }
+
+  .create-room-card {
+    padding: 2rem 1.5rem;
+    max-width: 100%;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+}
+
+/* ── Móvil (≤ 480px) ──────────────────────────────────────── */
+@media (max-width: 480px) {
+  .create-room-container {
+    padding: 1rem;
+    align-items: flex-start;
+    padding-top: 2rem;
+  }
+
+  .create-room-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .title {
+    font-size: 1.7rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .btn-cancel, .btn-submit {
+    font-size: 1.2rem;
+  }
+}

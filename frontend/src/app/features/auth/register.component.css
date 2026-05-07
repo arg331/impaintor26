@@ -9,8 +9,8 @@
   justify-content: center;
   overflow: hidden;
   background-image: url('/images/login/login-bg.png');
-  background-size: 100% 100%;
-  background-position: center;
+  background-size: cover;
+  background-position: center center;
   background-repeat: no-repeat;
 }
 
@@ -46,9 +46,9 @@
 /* ── Gato con pincel ─────────────────────────────── */
 .cat-brush {
   position: absolute;
-  left: -180px;
+  left: clamp(-140px, -15%, -60px);
   bottom: 0;
-  width: 280px;
+  width: clamp(160px, 22vw, 280px);
   object-fit: contain;
   pointer-events: none;
   user-select: none;
@@ -293,6 +293,35 @@ input::-webkit-credentials-auto-fill-button {
   text-decoration: underline;
 }
 
+/* ── Tablet grande (≤ 1024px) ────────────────────── */
+@media (max-width: 1024px) {
+  .register-container {
+    width: min(95vw, 540px);
+  }
+
+  .cat-brush {
+    left: clamp(-100px, -12%, -40px);
+    width: clamp(140px, 18vw, 220px);
+  }
+}
+
+/* ── Tablet pequeña (≤ 768px) ────────────────────── */
+@media (max-width: 768px) {
+  .register-container {
+    width: min(96vw, 480px);
+  }
+
+  .cat-brush {
+    left: clamp(-80px, -10%, -20px);
+    width: clamp(120px, 16vw, 180px);
+  }
+
+  .form-card {
+    padding: 2rem 3rem;
+  }
+}
+
+/* ── Móvil (≤ 600px) ───────────────────────────── */
 @media (max-width: 600px) {
   .cat-brush {
     display: none;

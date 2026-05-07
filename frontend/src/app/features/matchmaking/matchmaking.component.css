@@ -226,3 +226,57 @@
   from { transform: scale(1) rotate(-5deg); }
   to { transform: scale(1.2) rotate(5deg); }
 }
+
+/* ── Tablet pequeña (≤ 768px) ─────────────────────────────── */
+@media (max-width: 768px) {
+  .matchmaking-card {
+    max-width: 90vw;
+    padding: 2rem 1.5rem;
+  }
+
+  .matchmaking-title {
+    font-size: 1.7rem;
+  }
+
+  .indicator-ring {
+    width: 120px;
+    height: 120px;
+  }
+
+  .timer-text {
+    font-size: 1.5rem;
+  }
+}
+
+/* ── Móvil (≤ 480px) ──────────────────────────────────────── */
+@media (max-width: 480px) {
+  .matchmaking-card {
+    max-width: 95vw;
+    padding: 1.5rem 1rem;
+  }
+
+  .matchmaking-title {
+    font-size: 1.4rem;
+  }
+
+  .search-indicator {
+    margin: 2rem 0;
+  }
+
+  .indicator-ring {
+    width: 100px;
+    height: 100px;
+  }
+
+  .timer-text {
+    font-size: 1.3rem;
+  }
+
+  .elo-info {
+    padding: 1rem;
+  }
+
+  .range-value {
+    font-size: 1.2rem;
+  }
+}

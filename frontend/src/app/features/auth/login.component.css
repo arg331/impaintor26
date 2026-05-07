@@ -9,8 +9,8 @@
   justify-content: center;
   overflow: hidden;
   background-image: url('/images/login/login-bg.png');
-  background-size: 100% 100%;
-  background-position: center;
+  background-size: cover;
+  background-position: center center;
   background-repeat: no-repeat;
 }
 
@@ -35,7 +35,7 @@
 }
 
 .cat-peek {
-  width: 380px;
+  width: clamp(200px, 50vw, 380px);
   object-fit: contain;
   filter: drop-shadow(0 10px 24px rgba(50, 30, 5, 0.35));
   user-select: none;
@@ -254,9 +254,32 @@ input::-webkit-credentials-auto-fill-button {
   text-decoration: underline;
 }
 
+/* ── Tablet grande (≤ 1024px) ─────────────────────── */
+@media (max-width: 1024px) {
+  .login-container {
+    width: min(92vw, 420px);
+  }
+}
+
+/* ── Tablet pequeña (≤ 768px) ─────────────────────── */
+@media (max-width: 768px) {
+  .cat-peek {
+    width: clamp(180px, 45vw, 300px);
+  }
+
+  .form-card {
+    padding: 3rem 1.8rem 2.2rem;
+  }
+
+  .login-container {
+    width: min(94vw, 400px);
+  }
+}
+
+/* ── Móvil (≤ 480px) ──────────────────────────────── */
 @media (max-width: 480px) {
   .cat-peek {
-    width: 350px;
+    width: clamp(160px, 42vw, 260px);
   }
 
   .form-card {
