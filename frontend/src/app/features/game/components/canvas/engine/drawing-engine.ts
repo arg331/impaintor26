@@ -23,7 +23,7 @@ export class DrawingEngine {
   ) {
     this.ensureCanvasReady();
   }
-
+/* hola */
   setConfig(config: BrushConfig): void {
     this.config = config;
     if (this.tools[config.tool]) {

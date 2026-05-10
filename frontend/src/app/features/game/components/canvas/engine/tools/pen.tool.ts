@@ -21,7 +21,7 @@ export class PenTool implements IDrawingTool {
     
     context.addPointToStroke(point);
   }
-
+/* hola */
   onMove(point: Point, context: DrawingEngineContext, config: BrushConfig): void {
     const { ctx } = context;
     

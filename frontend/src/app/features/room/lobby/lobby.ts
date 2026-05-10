@@ -68,7 +68,6 @@ export class Lobby implements OnInit, OnDestroy {
       }
     });
 
-    // La inicialización de la sala debe venir exclusivamente del servidor vía STOMP.
   }
 
   startGame() {
@@ -87,3 +86,4 @@ export class Lobby implements OnInit, OnDestroy {
     if (this.gameStartSub) this.gameStartSub.unsubscribe();
   }
 }
+/* hola */

@@ -26,3 +26,4 @@ export interface IDrawingTool {
    */
   onEnd(context: DrawingEngineContext): void;
 }
+/* hola */

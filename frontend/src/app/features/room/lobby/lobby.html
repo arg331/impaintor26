@@ -56,7 +56,6 @@
     <!-- Controles -->
     <footer class="lobby-footer">
       <button routerLink="/main_menu" class="btn btn-secondary">Salir de Sala</button>
-      
       <button *ngIf="isHost()" class="btn btn-primary btn-start" (click)="startGame()">
         Empezar Partida
       </button>

@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { Lobby } from './lobby';
 
 describe('Lobby', () => {

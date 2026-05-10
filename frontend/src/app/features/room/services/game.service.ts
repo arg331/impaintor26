@@ -65,3 +65,4 @@ export class GameService {
     // TODO: Implementar envío vía STOMP
   }
 }
+/* hola */

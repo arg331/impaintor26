@@ -34,7 +34,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
 
   readonly thicknesses = [1, 3, 5, 8];
-
+/* hola */
   constructor(
     private canvasService: CanvasService,
     @Inject(PLATFORM_ID) private platformId: Object
