@@ -5,12 +5,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.impaintor.feature.wordgroup.models.WordGroup;
 
+import lombok.Data;
+
 /**
  * Estado de una partida activa.
  * Contiene ronda actual, fase, orden de dibujo, jugadores vivos, votos,
- * id del impostor, word group, palabra secreta, pista y vidas restantes del impostor.
+ * id del impostor, word group, palabra secreta y pista.
  */
+@Data
 public class GameState {
+
+    public record CanvasSnapshot(Long playerId, String dataUrl) {}
 
     public enum Phase { DRAWING, GALLERY, VOTING, TIE_BREAK, RESULT }
 
@@ -39,8 +44,9 @@ public class GameState {
     private String secretWord;
     private String hintWord;
 
-    // Vidas restantes del impostor
-    private int impostorLives = 1;
+    // Duración de la fase de galería en segundos (configurable por sala al iniciar la partida).
+    // Si es 0 indica que no se configuró y debe usarse el valor por defecto desde el servicio.
+    private int gallerySeconds = 0;
 
     // Índice del dibujante actual dentro de drawingOrder
     private int currentDrawerIndex = 0;
@@ -52,13 +58,6 @@ public class GameState {
         setDrawingOrder(initialOrder);
         setAlivePlayers(initialPlayers);
     }
-
-    // --- Getters / Setters ---
-    public int getRound() { return round; }
-    public void setRound(int round) { this.round = round; }
-
-    public Phase getPhase() { return phase; }
-    public void setPhase(Phase phase) { this.phase = phase; }
 
     public List<Long> getDrawingOrder() { return Collections.unmodifiableList(drawingOrder); }
     public void setDrawingOrder(Collection<Long> order) {
@@ -82,25 +81,6 @@ public class GameState {
         canvasSnapshots.put(playerId, dataUrl);
     }
     public void clearCanvasSnapshots() { canvasSnapshots.clear(); }
-
-    public Long getImpostorId() { return impostorId; }
-    public void setImpostorId(Long impostorId) { this.impostorId = impostorId; }
-
-    public WordGroup getWordGroup() { return wordGroup; }
-    public void setWordGroup(WordGroup wordGroup) { this.wordGroup = wordGroup; }
-
-    public String getSecretWord() { return secretWord; }
-    public void setSecretWord(String secretWord) { this.secretWord = secretWord; }
-
-    public String getHintWord() { return hintWord; }
-    public void setHintWord(String hintWord) { this.hintWord = hintWord; }
-
-    public int getImpostorLives() { return impostorLives; }
-    public void setImpostorLives(int impostorLives) { this.impostorLives = impostorLives; }
-
-    // --- Drawer index helpers ---
-    public int getCurrentDrawerIndex() { return currentDrawerIndex; }
-    public void setCurrentDrawerIndex(int idx) { this.currentDrawerIndex = idx; }
 
     public Long getCurrentDrawer() {
         synchronized (drawingOrder) {

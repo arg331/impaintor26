@@ -1,5 +1,7 @@
 package com.impaintor.feature.room.controller;
 //Commit
+import com.impaintor.feature.game.model.GameState;
+import com.impaintor.feature.game.service.GameService;
 import com.impaintor.feature.room.models.Room;
 import com.impaintor.feature.room.utilities.RandomGenerations;
 import com.impaintor.feature.user.models.User;
@@ -29,6 +31,9 @@ public class RoomController{
     
     @Autowired 
     private RoomRepository roomRepository;
+
+    @Autowired
+    private GameService gameService;
 
     @PostMapping("/create")
     public Room createRoom() {
@@ -123,37 +128,11 @@ public class RoomController{
 
     @PostMapping("/{code}/start")
     public ResponseEntity<?> startGame(@PathVariable String code) {
-        Optional<Room> oRoom = roomRepository.findById(code);
-        if (oRoom.isEmpty()) return ResponseEntity.notFound().build();
-
-        Room room = oRoom.get();
-
-        if (room.getGameState() != Room.GameState.WAITING) {
-            return ResponseEntity.badRequest().body("La sala no está en espera.");
+        try {
+            GameState gameState = gameService.initializeGame(code);
+            return ResponseEntity.ok(gameState);
+        } catch (IllegalStateException | IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
         }
-
-        String error = validarRequisitosInicio(room);
-        if (error != null) {
-            return ResponseEntity.badRequest().body(error);
-        }
-
-        room.setGameState(Room.GameState.PLAYING);
-        roomRepository.save(room);
-        
-        return ResponseEntity.ok(room);
-    }
-
-    private String validarRequisitosInicio(Room room) {
-        int numJugadores = room.getPlayersNames().size();
-
-        if (room.getMode() == Room.Mode.RANKED && numJugadores != 5) {
-            return "El modo RANKED requiere exactamente 5 jugadores.";
-        }
-        
-        if (numJugadores < 2) {
-            return "Se necesitan al menos 2 jugadores para jugar.";
-        }
-
-        return null;
     }
 }

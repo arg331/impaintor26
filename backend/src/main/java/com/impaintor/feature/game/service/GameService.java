@@ -13,9 +13,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import com.impaintor.feature.game.model.GameState;
-import com.impaintor.feature.realtime.dto.outbound.GameEvent.CanvasSnapshot;
+import com.impaintor.feature.game.model.GameState.CanvasSnapshot;
+import com.impaintor.feature.game.model.GalleryPhaseEvent;
 import com.impaintor.feature.realtime.dto.outbound.RoleAssignment;
 import com.impaintor.feature.realtime.service.RealtimePublisher;
 import com.impaintor.feature.room.models.Room;
@@ -31,9 +33,12 @@ import com.impaintor.feature.realtime.dto.outbound.GameEvent;
 @Service
 public class GameService {
 
+    private static final String GAME_TOPIC = "/topic/room.%s.game";
+
     private final RoomRepository roomRepository;
     private final WordGroupRepository wordGroupRepository;
     private final RealtimePublisher realtimePublisher;
+    private final SimpMessagingTemplate messagingTemplate;
 
     private final Map<String, GameState> activeGames = new ConcurrentHashMap<>();
     private final Map<String, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
@@ -41,10 +46,12 @@ public class GameService {
 
     public GameService(RoomRepository roomRepository,
                        WordGroupRepository wordGroupRepository,
-                       RealtimePublisher realtimePublisher) {
+                       RealtimePublisher realtimePublisher,
+                       SimpMessagingTemplate messagingTemplate) {
         this.roomRepository = roomRepository;
         this.wordGroupRepository = wordGroupRepository;
         this.realtimePublisher = realtimePublisher;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @Transactional
@@ -88,7 +95,6 @@ public class GameService {
         gameState.setSecretWord(secretWord);
         gameState.setHintWord(hintWord);
         gameState.setImpostorId(impostor.getId());
-        gameState.setImpostorLives(resolveImpostorLives(room));
 
         activeGames.put(roomCode, gameState);
 
@@ -123,10 +129,6 @@ public class GameService {
                 .orElseThrow(() -> new IllegalStateException("No hay grupos de palabras disponibles"));
     }
 
-    private int resolveImpostorLives(Room room) {
-        return room.getImpostorTries() != null ? room.getImpostorTries() : 1;
-    }
-
     private List<Long> extractPlayerIds(List<User> players) {
         List<Long> ids = new ArrayList<>();
         for (User player : players) {
@@ -140,7 +142,7 @@ public class GameService {
             Long playerId = player.getId();
             if (playerId != null && playerId.equals(gameState.getImpostorId())) {
                 realtimePublisher.sendRoleAssignment(playerId,
-                        new RoleAssignment.Impostor(gameState.getHintWord(), gameState.getImpostorLives()));
+                        new RoleAssignment.Impostor(gameState.getHintWord(), 0));
             } else {
                 realtimePublisher.sendRoleAssignment(playerId,
                         new RoleAssignment.Painter(gameState.getSecretWord()));
@@ -236,7 +238,7 @@ public class GameService {
                 }
             }
 
-            realtimePublisher.publishGameEvent(roomCode, new GameEvent.GalleryPhase(snapshots));
+            messagingTemplate.convertAndSend(GAME_TOPIC.formatted(roomCode), new GalleryPhaseEvent(snapshots));
 
             scheduleVotePhase(roomCode, gs);
         }
