@@ -48,8 +48,23 @@ public class GameEndService {
         
         gameRecord = gameRecordRepository.save(gameRecord);
 
-        // 2. Crear GamePlayerRecords y actualizar Users
+        // 2. Calcular Elos (Solo para RANKED)
+        double paintorsEloSum = 0;
+        int paintorsCount = 0;
+        double impostorElo = 1000;
+
         List<User> players = room.getPlayersNames();
+        for (User user : players) {
+            boolean isImpostor = gameState.getImpostorId() != null && gameState.getImpostorId().equals(user.getId());
+            if (isImpostor) {
+                impostorElo = user.getElo() != null ? user.getElo() : 1000;
+            } else {
+                paintorsEloSum += user.getElo() != null ? user.getElo() : 1000;
+                paintorsCount++;
+            }
+        }
+        double paintorsAvgElo = paintorsCount > 0 ? paintorsEloSum / paintorsCount : 1000;
+
         for (User user : players) {
             boolean isImpostor = gameState.getImpostorId() != null && gameState.getImpostorId().equals(user.getId());
             boolean isWinner = false;
@@ -60,13 +75,59 @@ public class GameEndService {
                 isWinner = true;
             }
 
+            int eloChange = 0;
+            if (room.getMode() == Room.Mode.RANKED) {
+                double eloP = isImpostor ? paintorsAvgElo : impostorElo;
+                double eloA = user.getElo() != null ? user.getElo() : 1000;
+                
+                double e = 1.0 / (1.0 + Math.pow(10.0, (eloP - eloA) / 400.0));
+                double difElo = isWinner ? (1.0 - e) : e;
+                double k = 0;
+
+                if (isImpostor) {
+                    if (isWinner) {
+                        if (endCondition == Room.EndCondition.LAST_STANDING) {
+                            k = 50;
+                        } else {
+                            k = 30; // WORD_GUESSED or default
+                        }
+                    } else {
+                        if (endCondition == Room.EndCondition.VOTED_OUT) {
+                            k = -25;
+                        } else {
+                            k = -35; // OUT_OF_LIVES (failed word) or default
+                        }
+                    }
+                } else {
+                    // Paintor
+                    if (isWinner) {
+                        if (gameState.getCurrentRound() < 4) {
+                            k = 30;
+                        } else {
+                            k = 20;
+                        }
+                    } else {
+                        if (endCondition == Room.EndCondition.WORD_GUESSED) {
+                            k = -20;
+                        } else {
+                            k = -40; // LAST_STANDING or default loss
+                        }
+                    }
+                }
+
+                int rawEloChange = (int) Math.round(k * difElo);
+                int newElo = Math.max(1000, (int) eloA + rawEloChange);
+                eloChange = newElo - (int) eloA;
+                user.setElo(newElo);
+            }
+
             // Crear record de jugador
             GamePlayerRecord playerRecord = GamePlayerRecord.builder()
                     .gameRecord(gameRecord)
                     .user(user)
                     .isImpostor(isImpostor)
                     .isWinner(isWinner)
-                    .eloChange(0) // No ELO calculation yet
+                    .eloChange(eloChange)
                     .build();
             gamePlayerRecordRepository.save(playerRecord);
 

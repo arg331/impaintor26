@@ -74,7 +74,7 @@ public class GameEndServiceTest {
 
         gameState = new GameState();
         gameState.setImpostorId(1L); // player1 is impostor
-        
+
         when(gameRecordRepository.save(any(GameRecord.class))).thenAnswer(i -> {
             GameRecord gr = i.getArgument(0);
             gr.setId(100L);
@@ -88,18 +88,15 @@ public class GameEndServiceTest {
 
         verify(gameRecordRepository, times(1)).save(any(GameRecord.class));
         verify(gamePlayerRecordRepository, times(2)).save(any(GamePlayerRecord.class));
-        
-        // Impostor (player1) wins
-        assertEquals(11, player1.getGamesPlayed());
-        assertEquals(6, player1.getGamesWon()); 
 
-        // Paintor (player2) loses
+        assertEquals(11, player1.getGamesPlayed());
+        assertEquals(6, player1.getGamesWon());
+
         assertEquals(11, player2.getGamesPlayed());
         assertEquals(5, player2.getGamesWon());
 
         verify(userRepository, times(2)).save(any(User.class));
 
-        // Room state cleaned
         assertEquals(Room.GameState.WAITING, room.getGameState());
         assertNull(room.getSecretWord());
         assertNull(room.getHintWord());
@@ -109,27 +106,23 @@ public class GameEndServiceTest {
         assertNull(room.getRounds());
         assertNull(room.getImpostorTries());
 
-        // Players cleared because it is RANKED
         assertTrue(room.getPlayersNames().isEmpty());
-        
+
         verify(roomRepository, times(1)).save(room);
     }
 
     @Test
     void testHandleGameEnd_CustomMode_PaintorsWin() {
         room.setMode(Room.Mode.CUSTOM);
-        
+
         gameEndService.handleGameEnd(room, gameState, Room.WinningSide.PAINTOR, Room.EndCondition.VOTED_OUT);
 
-        // Impostor (player1) loses
         assertEquals(11, player1.getGamesPlayed());
-        assertEquals(5, player1.getGamesWon()); 
+        assertEquals(5, player1.getGamesWon());
 
-        // Paintor (player2) wins
         assertEquals(11, player2.getGamesPlayed());
         assertEquals(6, player2.getGamesWon());
 
-        // Players NOT cleared because it is CUSTOM
         assertFalse(room.getPlayersNames().isEmpty());
         assertEquals(2, room.getPlayersNames().size());
     }
@@ -137,37 +130,127 @@ public class GameEndServiceTest {
     @Test
     void testHandleGameEnd_SwiftplayMode_PlayersCleared() {
         room.setMode(Room.Mode.SWIFTPLAY);
-        
+
         gameEndService.handleGameEnd(room, gameState, Room.WinningSide.IMPAINTOR, Room.EndCondition.LAST_STANDING);
 
-        // Players cleared because it is SWIFTPLAY (like RANKED)
         assertTrue(room.getPlayersNames().isEmpty());
     }
 
     @Test
     void testHandleGameEnd_EmptyPlayersList() {
         room.getPlayersNames().clear();
-        
+
         gameEndService.handleGameEnd(room, gameState, Room.WinningSide.IMPAINTOR, Room.EndCondition.LAST_STANDING);
 
         verify(gameRecordRepository, times(1)).save(any(GameRecord.class));
         verify(gamePlayerRecordRepository, never()).save(any(GamePlayerRecord.class));
         verify(userRepository, never()).save(any(User.class));
-        
+
         assertTrue(room.getPlayersNames().isEmpty());
     }
 
     @Test
     void testHandleGameEnd_NoImpostorIdInGameState() {
         gameState.setImpostorId(null);
-        
+
         gameEndService.handleGameEnd(room, gameState, Room.WinningSide.PAINTOR, Room.EndCondition.WORD_GUESSED);
 
-        // Si no hay impostor, nadie es impostor. Si ganan los pintores, todos (al no ser impostores) ganan.
         assertEquals(11, player1.getGamesPlayed());
-        assertEquals(6, player1.getGamesWon()); 
-        
+        assertEquals(6, player1.getGamesWon());
+
         assertEquals(11, player2.getGamesPlayed());
         assertEquals(6, player2.getGamesWon());
+    }
+
+    @Test
+    void testHandleGameEnd_RankedMode_EloCalculation_ImpostorWinsLastStanding() {
+        player1.setElo(1200);
+        player2.setElo(1200);
+
+        gameEndService.handleGameEnd(room, gameState, Room.WinningSide.IMPAINTOR, Room.EndCondition.LAST_STANDING);
+
+        assertEquals(1225, player1.getElo());
+        assertEquals(1180, player2.getElo());
+    }
+
+    @Test
+    void testHandleGameEnd_RankedMode_EloCalculation_PaintorWinsEarly() {
+        player1.setElo(1200);
+        player2.setElo(1200);
+        gameState.setCurrentRound(3);
+
+        gameEndService.handleGameEnd(room, gameState, Room.WinningSide.PAINTOR, Room.EndCondition.VOTED_OUT);
+
+        assertEquals(1188, player1.getElo());
+        assertEquals(1215, player2.getElo());
+    }
+
+    @Test
+    void testHandleGameEnd_CustomMode_NoEloCalculation() {
+        player1.setElo(1200);
+        player2.setElo(1200);
+        room.setMode(Room.Mode.CUSTOM);
+
+        gameEndService.handleGameEnd(room, gameState, Room.WinningSide.IMPAINTOR, Room.EndCondition.LAST_STANDING);
+
+        assertEquals(1200, player1.getElo());
+        assertEquals(1200, player2.getElo());
+    }
+
+    @Test
+    void testHandleGameEnd_RankedMode_EloCalculation_EloCannotDropBelow1000() {
+        player1.setElo(1000);
+        player2.setElo(1000);
+
+        gameState.setCurrentRound(4);
+        gameEndService.handleGameEnd(room, gameState, Room.WinningSide.PAINTOR, Room.EndCondition.VOTED_OUT);
+
+        assertEquals(1000, player1.getElo());
+
+        assertEquals(1010, player2.getElo());
+    }
+
+    @Test
+    void testHandleGameEnd_RankedMode_EloCalculation_ImpostorWinsByWord() {
+        player1.setElo(1200);
+        player2.setElo(1200);
+
+        gameEndService.handleGameEnd(room, gameState, Room.WinningSide.IMPAINTOR, Room.EndCondition.WORD_GUESSED);
+
+        assertEquals(1215, player1.getElo());
+        assertEquals(1190, player2.getElo());
+    }
+
+    @Test
+    void testHandleGameEnd_RankedMode_EloCalculation_ImpostorLosesFailedWord() {
+        player1.setElo(1200);
+        player2.setElo(1200);
+        gameState.setCurrentRound(5);
+
+        gameEndService.handleGameEnd(room, gameState, Room.WinningSide.PAINTOR, Room.EndCondition.OUT_OF_LIVES);
+
+        assertEquals(1183, player1.getElo());
+        assertEquals(1210, player2.getElo());
+    }
+
+    @Test
+    void testHandleGameEnd_RankedMode_EloCalculation_ImpostorLosesDifferentEloP() {
+        player1.setElo(1500);
+        player2.setElo(1100);
+        User player3 = new User();
+        player3.setId(3L);
+        player3.setElo(1100);
+        player3.setGamesPlayed(0);
+        player3.setGamesWon(0);
+
+        room.getPlayersNames().add(player3);
+
+        gameState.setCurrentRound(5);
+        gameEndService.handleGameEnd(room, gameState, Room.WinningSide.PAINTOR, Room.EndCondition.VOTED_OUT);
+
+        assertEquals(1477, player1.getElo());
+
+        assertEquals(1118, player2.getElo());
+        assertEquals(1118, player3.getElo());
     }
 }
