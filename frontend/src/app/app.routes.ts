@@ -1,3 +1,4 @@
+// NO SUBIR, TESTING
 import { Routes } from '@angular/router';
 import { HomeLandingComponent } from './features/auth/home-landing/home-landing.component';
 import { LoginComponent } from './features/auth/login.component';
@@ -5,7 +6,7 @@ import { RegisterComponent } from './features/auth/register.component';
 import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
 import { HomeComponent } from './features/home/home.component';
 import { ProfileComponent } from './features/auth/profile/profile.component';
-
+import { CanvasComponent } from './features/game/components/canvas/canvas';
 // Nuevas rutas
 import { CreateRoomComponent } from './features/room/create/create-room.component';
 import { Lobby } from './features/room/lobby/lobby';
@@ -27,7 +28,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/game/containers/game/game').then((m) => m.GameComponent),
   },
-  
+  { path: 'test-canvas', component: CanvasComponent },
   // Fallback
   { path: '**', redirectTo: '' }
 ];
