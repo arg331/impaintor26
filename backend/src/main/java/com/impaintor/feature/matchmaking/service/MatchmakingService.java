@@ -109,7 +109,6 @@ public class MatchmakingService {
 
         String code = RandomGenerations.CodifyRoomId(RandomGenerations.RoomRandomId());
         Room room = new Room();
-        room.setId(code);
         room.setRoomCode(code);
         room.setMode(Room.Mode.RANKED);
         room.setSize(MATCH_SIZE);
