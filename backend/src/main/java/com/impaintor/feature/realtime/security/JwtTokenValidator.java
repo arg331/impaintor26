@@ -24,11 +24,9 @@ import io.jsonwebtoken.security.Keys;
 public class JwtTokenValidator implements TokenValidator {
 
     private final SecretKey key;
-    private final String issuer;
 
     public JwtTokenValidator(RealtimeProperties props) {
         this.key = Keys.hmacShaKeyFor(props.jwt().secret().getBytes(StandardCharsets.UTF_8));
-        this.issuer = props.jwt().issuer();
     }
 
     @Override
@@ -39,16 +37,16 @@ public class JwtTokenValidator implements TokenValidator {
         try {
             Claims claims = Jwts.parser()
                     .verifyWith(key)
-                    .requireIssuer(issuer)
                     .build()
                     .parseSignedClaims(rawToken)
                     .getPayload();
-            Long id = Long.valueOf(claims.getSubject());
-            String username = claims.get("username", String.class);
-            if (username == null) {
+            // sub = email (Spring Security username); uid claim = database user id
+            String email = claims.getSubject();
+            Long id = claims.get("uid", Long.class);
+            if (email == null || id == null) {
                 return Optional.empty();
             }
-            return Optional.of(new AuthenticatedUser(id, username));
+            return Optional.of(new AuthenticatedUser(id, email));
         } catch (JwtException | IllegalArgumentException e) {
             return Optional.empty();
         }
