@@ -37,6 +37,8 @@ public class MatchmakingService {
 
     // Inline-initialized so @RequiredArgsConstructor does not include it as a constructor arg.
     private final ConcurrentHashMap<Long, QueueEntry> queue = new ConcurrentHashMap<>();
+    // Holds the room code for users who were matched but may not have received the WS notification.
+    private final ConcurrentHashMap<Long, String> pendingMatches = new ConcurrentHashMap<>();
 
     // --- Public queue API (called by MatchmakingController) ---
 
@@ -50,15 +52,17 @@ public class MatchmakingService {
 
     public void leave(Long userId) {
         queue.remove(userId);
+        pendingMatches.remove(userId);
     }
 
     public MatchmakingStatusResponse getStatus(Long userId) {
         QueueEntry entry = queue.get(userId);
         if (entry == null) {
-            return new MatchmakingStatusResponse(false, 0, 0);
+            String roomCode = pendingMatches.remove(userId);
+            return new MatchmakingStatusResponse(false, 0, 0, roomCode);
         }
         long waitSeconds = ChronoUnit.SECONDS.between(entry.joinedAt(), Instant.now());
-        return new MatchmakingStatusResponse(true, waitSeconds, searchRangeFor(entry));
+        return new MatchmakingStatusResponse(true, waitSeconds, searchRangeFor(entry), null);
     }
 
     // --- Matching loop (called by MatchmakingScheduler every 2 s) ---
@@ -116,8 +120,16 @@ public class MatchmakingService {
         room.setPlayersNames(new ArrayList<>(users));
         roomRepository.save(room);
 
+        users.forEach(u -> pendingMatches.put(u.getId(), code));
+
         MatchFoundNotification notification = new MatchFoundNotification(code);
-        users.forEach(u -> realtimePublisher.sendMatchFound(u.getId(), notification));
+        users.forEach(u -> {
+            try {
+                realtimePublisher.sendMatchFound(u.getId(), notification);
+            } catch (Exception ex) {
+                log.warn("WS notification failed for user {} (polling fallback active): {}", u.getId(), ex.getMessage());
+            }
+        });
 
         log.info("Ranked room {} created for players {}", code,
                 users.stream().map(User::getId).toList());

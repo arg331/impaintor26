@@ -63,9 +63,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        String[] origins = properties.websocket().allowedOrigins().toArray(String[]::new);
         registry.addEndpoint(properties.websocket().endpoint())
-                .setAllowedOriginPatterns(origins);
+                .setAllowedOriginPatterns("*");
     }
 
     @Override

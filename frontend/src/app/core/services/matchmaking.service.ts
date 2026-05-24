@@ -6,6 +6,7 @@ export interface MatchmakingStatus {
   queued: boolean;
   waitSeconds: number;
   searchRange: number;
+  roomCode?: string;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { filter, take } from 'rxjs';
 
 import { AuthService } from '../../core/services/auth.service';
 import { WebSocketService } from '../../core/services/websocket.service';
@@ -60,14 +59,8 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
       });
     this.subs.add(wsSub);
 
-    const connSub = this.wsService.status$.pipe(
-      filter((s) => s === 'CONNECTED'),
-      take(1),
-    ).subscribe(() => {
-      this.joinAndStart();
-      this.startPolling();
-    });
-    this.subs.add(connSub);
+    this.joinAndStart();
+    this.startPolling();
   }
 
   private joinAndStart(): void {
@@ -102,7 +95,16 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
     this.pollInterval = setInterval(() => {
       const pollSub = this.matchmakingService.getStatus().subscribe({
         next: (status) => {
-          if (!status.queued && !this.matchFound) {
+          if (this.matchFound) return;
+          if (status.roomCode) {
+            // WS notification was missed; room code arrived via polling fallback.
+            this.matchFound = true;
+            this.stopTick();
+            this.stopPolling();
+            this.router.navigate(['/room', status.roomCode, 'lobby']);
+            return;
+          }
+          if (!status.queued) {
             // Kicked from queue (e.g. WebSocket reconnect or failed room creation); silently re-join.
             this.joinAndStart();
             return;
