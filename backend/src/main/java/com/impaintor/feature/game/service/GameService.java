@@ -61,7 +61,7 @@ public class GameService {
             return existing;
         }
 
-        Room room = roomRepository.findById(roomCode)
+        Room room = roomRepository.findByRoomCode(roomCode)
                 .orElseThrow(() -> new IllegalArgumentException("No existe la sala " + roomCode));
 
         List<User> players = room.getPlayersNames();
@@ -169,7 +169,7 @@ public class GameService {
                 return;
             }
 
-            int timeSeconds = roomRepository.findById(roomCode)
+            int timeSeconds = roomRepository.findByRoomCode(roomCode)
                     .map(Room::getDrawTime)
                     .filter(d -> d != null && d > 0)
                     .orElse(30);
@@ -245,7 +245,7 @@ public class GameService {
     }
 
     private void scheduleVotePhase(String roomCode, GameState gs) {
-        int gallerySeconds = roomRepository.findById(roomCode)
+        int gallerySeconds = roomRepository.findByRoomCode(roomCode)
                 .map(Room::getDrawTime)
                 .filter(d -> d != null && d > 0)
                 .orElse(30) / 2;
