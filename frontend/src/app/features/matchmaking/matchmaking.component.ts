@@ -1,10 +1,12 @@
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 import { AuthService } from '../../core/services/auth.service';
 import { WebSocketService } from '../../core/services/websocket.service';
 import { MatchmakingService } from '../../core/services/matchmaking.service';
+import { User } from '../../shared/models/auth.model';
 
 interface MatchFoundMessage {
   type: string;
@@ -23,6 +25,7 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private wsService = inject(WebSocketService);
   private matchmakingService = inject(MatchmakingService);
+  private http = inject(HttpClient);
 
   waitSeconds = signal(0);
   searchRange = signal(50);
@@ -36,14 +39,18 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
   private localJoinedAt: number | null = null;
 
   ngOnInit(): void {
-    const user = this.authService.getCurrentUser();
-    if (user) this.myElo.set(user.elo);
+    const cached = this.authService.getCurrentUser();
+    if (cached) this.myElo.set(cached.elo);
 
     const token = this.authService.getToken();
     if (!token) {
       this.router.navigate(['/login']);
       return;
     }
+
+    this.http.get<User>('/api/users/me').subscribe({
+      next: (user) => this.myElo.set(user.elo),
+    });
 
     this.wsService.connect({ url: '/ws', jwt: token });
 
@@ -132,7 +139,7 @@ export class MatchmakingComponent implements OnInit, OnDestroy {
   }
 
   lowerElo(): number {
-    return Math.max(0, this.myElo() - this.searchRange());
+    return Math.max(1000, this.myElo() - this.searchRange());
   }
 
   formatTime(seconds: number): string {
