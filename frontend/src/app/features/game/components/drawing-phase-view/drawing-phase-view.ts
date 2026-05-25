@@ -59,7 +59,7 @@ export class DrawingPhaseView implements OnInit, OnDestroy {
 
   protected readonly isImpostor = computed(() => this.state().myRole === 'IMPOSTOR');
 
-  protected readonly canDraw = computed(() => this.isMyTurn() && this.state().myRole === 'PAINTER');
+  protected readonly canDraw = computed(() => this.isMyTurn());
 
   protected readonly drawerSnapshot = computed(() => {
     const id = this.state().currentDrawerId;

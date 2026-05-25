@@ -70,7 +70,7 @@ export class GameStateService {
       case 'TURN_START':
         return {
           ...s,
-          phase: s.phase === 'CONNECTING' ? 'DRAWING' : s.phase,
+          phase: (s.phase === 'CONNECTING' || s.phase === 'RESULT') ? 'DRAWING' : s.phase,
           currentDrawerId: e.playerId,
           timeRemainingSec: e.timeSeconds,
           drawingOrder: e.drawingOrder?.length ? e.drawingOrder : s.drawingOrder,
