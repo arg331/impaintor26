@@ -46,6 +46,9 @@ export class WebSocketService {
   /** Estado de la conexión observable. */
   readonly status$: Observable<StompStatus> = this._status$.asObservable();
 
+  /** Snapshot síncrono del estado actual. */
+  get currentStatus(): StompStatus { return this._status$.value; }
+
   /**
    * Inicia la conexión STOMP. Idempotente: llamar dos veces no crea dos clientes.
    * No-op en SSR.
@@ -62,20 +65,26 @@ export class WebSocketService {
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
-      debug: () => {},
+      debug: (str) => console.log('[STOMP]', str),
     });
 
     this.client.onConnect = (_frame: IFrame) => {
-      this._status$.next('CONNECTED');
+      console.log('[WebSocket] STOMP CONNECTED, pending subs:', this.pendingSubs.length);
       this.flushPendingSubs();
+      this._status$.next('CONNECTED');
     };
 
     this.client.onStompError = (frame: IFrame) => {
       console.error('[WebSocket] STOMP broker error:', frame.headers['message'], frame.body);
     };
 
-    this.client.onWebSocketClose = () => {
+    this.client.onWebSocketClose = (evt) => {
+      console.warn('[WebSocket] WS closed, code:', (evt as CloseEvent).code, (evt as CloseEvent).reason);
       this._status$.next('DISCONNECTED');
+    };
+
+    this.client.onWebSocketError = (evt) => {
+      console.error('[WebSocket] WS error:', evt);
     };
 
     this.client.activate();

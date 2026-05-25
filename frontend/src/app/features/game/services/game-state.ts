@@ -51,6 +51,12 @@ export class GameStateService {
     );
   }
 
+  applyEloUpdate(eloChange: number): void {
+    this._state.update((s) =>
+      s.gameOver ? { ...s, gameOver: { ...s.gameOver, eloChange } } : s,
+    );
+  }
+
   reset(): void {
     this._state.set(structuredClone(INITIAL_STATE));
   }
@@ -62,7 +68,13 @@ export class GameStateService {
       case 'GAME_START':
         return { ...s, phase: 'DRAWING', round: e.round, drawingOrder: e.drawingOrder };
       case 'TURN_START':
-        return { ...s, currentDrawerId: e.playerId, timeRemainingSec: e.timeSeconds };
+        return {
+          ...s,
+          phase: (s.phase === 'CONNECTING' || s.phase === 'RESULT') ? 'DRAWING' : s.phase,
+          currentDrawerId: e.playerId,
+          timeRemainingSec: e.timeSeconds,
+          drawingOrder: e.drawingOrder?.length ? e.drawingOrder : s.drawingOrder,
+        };
       case 'TURN_END':
         return { ...s, currentDrawerId: null };
       case 'GALLERY_PHASE':
@@ -74,6 +86,7 @@ export class GameStateService {
           ...s,
           phase: 'RESULT',
           eliminated: e.eliminated,
+          eliminatedPlayers: e.eliminated != null ? [...s.eliminatedPlayers, e.eliminated] : s.eliminatedPlayers,
           wasImpostorEliminated: e.wasImpostor,
           topVoted: e.topVoted,
         };
@@ -93,6 +106,7 @@ export class GameStateService {
           wasImpostorEliminated: null,
           topVoted: [],
           tiedPlayers: [],
+          // eliminatedPlayers intentionally preserved across rounds
         };
       case 'GAME_OVER':
         return {
@@ -103,6 +117,7 @@ export class GameStateService {
             reason: e.reason,
             impostorId: e.impostorId,
             secretWord: e.secretWord,
+            eloChange: e.eloChange,
           },
         };
       default: {

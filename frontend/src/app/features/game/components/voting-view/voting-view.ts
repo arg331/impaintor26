@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, computed, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Output, computed, inject, input, signal } from '@angular/core';
 
 import { GameState } from '../../models/game-state';
 import { SpectatorCanvasService } from '../../services/spectator-canvas';
@@ -18,16 +18,22 @@ import { SpectatorCanvasService } from '../../services/spectator-canvas';
   styleUrl: './voting-view.css',
 })
 export class VotingView {
-  @Input({ required: true }) state!: GameState;
-  @Input() myPlayerId: number | null = null;
+  readonly state = input.required<GameState>();
+  readonly myPlayerId = input<number | null>(null);
 
   @Output() voteCast = new EventEmitter<number>();
 
   protected readonly spectator = inject(SpectatorCanvasService);
   protected readonly myVote = signal<number | null>(null);
 
+  protected readonly isLocalPlayerEliminated = computed(() => {
+    const id = this.myPlayerId();
+    return id != null && this.state().eliminatedPlayers.includes(id);
+  });
+
   protected readonly votablePlayers = computed(() => {
-    return this.state.drawingOrder.filter((id) => id !== this.state.eliminated);
+    const eliminated = new Set(this.state().eliminatedPlayers);
+    return this.state().drawingOrder.filter((id) => !eliminated.has(id));
   });
 
   protected snapshotFor(playerId: number): string | null {

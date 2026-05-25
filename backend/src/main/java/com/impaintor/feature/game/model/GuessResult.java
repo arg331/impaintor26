@@ -1,6 +1,4 @@
-package com.impaintor.feature.game.models;
-
-import java.util.List;
+package com.impaintor.feature.game.model;
 
 import lombok.Builder;
 import lombok.Data;

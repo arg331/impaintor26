@@ -1,8 +1,8 @@
 package com.impaintor.feature.game.service;
 
-import com.impaintor.feature.game.models.GameState;
-import com.impaintor.feature.game.models.GuessResult;
-import com.impaintor.feature.game.models.VoteResult;
+import com.impaintor.feature.game.model.GameState;
+import com.impaintor.feature.game.model.GuessResult;
+import com.impaintor.feature.game.model.VoteResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,9 +41,9 @@ public class GameLogicServiceTest {
 
     @Test
     void testRound1Tie() {
-        mockState.setCurrentRound(1);
+        mockState.setRound(1);
         mockState.setImpostorId(1L);
-        mockState.setAlivePlayerId(List.of(1L, 2L, 3L, 4L));
+        mockState.setAlivePlayers(List.of(1L, 2L, 3L, 4L));
 
         Map<Long, Long> votes = Map.of(
                 1L, 1L,
@@ -61,7 +61,7 @@ public class GameLogicServiceTest {
     @Test
     void testPlayerVotedOutBeingImpaintor() {
         mockState.setImpostorId(1L);
-        mockState.setAlivePlayerId(List.of(1L, 2L, 3L, 4L));
+        mockState.setAlivePlayers(List.of(1L, 2L, 3L, 4L));
 
         Map<Long, Long> votes = Map.of(
                 1L, 2L,
@@ -80,8 +80,8 @@ public class GameLogicServiceTest {
     @Test
     void testPlayerVotedOutBeingPaintor() {
         mockState.setImpostorId(2L);
-        mockState.setCurrentRound(1);
-        mockState.setAlivePlayerId(List.of(1L, 2L, 3L, 4L));
+        mockState.setRound(1);
+        mockState.setAlivePlayers(List.of(1L, 2L, 3L, 4L));
 
         Map<Long, Long> votes = Map.of(
                 1L, 2L,
@@ -98,9 +98,9 @@ public class GameLogicServiceTest {
 
     @Test
     void testSelfVoteOnAbsence() {
-        mockState.setCurrentRound(1);
+        mockState.setRound(1);
         mockState.setImpostorId(99L);
-        mockState.setAlivePlayerId(List.of(1L, 2L, 3L, 4L));
+        mockState.setAlivePlayers(List.of(1L, 2L, 3L, 4L));
 
         Map<Long, Long> votes = new HashMap<>();
         votes.put(1L, 3L);
@@ -116,9 +116,9 @@ public class GameLogicServiceTest {
 
     @Test
     void testRound2TieEmitsTieEvent() {
-        mockState.setCurrentRound(2);
+        mockState.setRound(2);
         mockState.setImpostorId(99L);
-        mockState.setAlivePlayerId(List.of(1L, 2L, 3L, 4L));
+        mockState.setAlivePlayers(List.of(1L, 2L, 3L, 4L));
 
         Map<Long, Long> votes = Map.of(
                 1L, 1L,
@@ -137,9 +137,9 @@ public class GameLogicServiceTest {
 
     @Test
     void testRound2MassiveTieWhenNobodyVotes() {
-        mockState.setCurrentRound(2);
+        mockState.setRound(2);
         mockState.setImpostorId(99L);
-        mockState.setAlivePlayerId(List.of(1L, 2L, 3L, 4L));
+        mockState.setAlivePlayers(List.of(1L, 2L, 3L, 4L));
 
         Map<Long, Long> emptyVotes = new HashMap<>();
 
@@ -181,9 +181,9 @@ public class GameLogicServiceTest {
 
     @Test
     void testApplyEliminationAndAdvanceRound() {
-        mockState.setCurrentRound(1);
+        mockState.setRound(1);
         mockState.setImpostorId(4L);
-        mockState.setAlivePlayerId(new java.util.ArrayList<>(java.util.List.of(1L, 2L, 3L, 4L))); // Lista mutable
+        mockState.setAlivePlayers(new java.util.ArrayList<>(java.util.List.of(1L, 2L, 3L, 4L))); // Lista mutable
 
         VoteResult resultFromVoting = VoteResult.builder()
                 .nobodyEliminated(false)
@@ -193,16 +193,16 @@ public class GameLogicServiceTest {
 
         gameLogicService.applyRoundResult(mockState, resultFromVoting);
 
-        assertFalse(mockState.getAlivePlayerId().contains(2L));
-        assertEquals(3, mockState.getAlivePlayerId().size());
-        assertEquals(2, mockState.getCurrentRound());
+        assertFalse(mockState.getAlivePlayers().contains(2L));
+        assertEquals(3, mockState.getAlivePlayers().size());
+        assertEquals(2, mockState.getRound());
     }
 
     @Test
     void testImpostorWinsIfOnlyOnePainterLeft() {
-        mockState.setCurrentRound(3);
+        mockState.setRound(3);
         mockState.setImpostorId(4L);
-        mockState.setAlivePlayerId(new java.util.ArrayList<>(java.util.List.of(1L, 3L, 4L)));
+        mockState.setAlivePlayers(new java.util.ArrayList<>(java.util.List.of(1L, 3L, 4L)));
 
         VoteResult resultFromVoting = VoteResult.builder()
                 .nobodyEliminated(false)

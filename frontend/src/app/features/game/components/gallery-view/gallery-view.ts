@@ -1,4 +1,4 @@
-import { Component, Input, computed, inject } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 
 import { GameState } from '../../models/game-state';
 import { SpectatorCanvasService } from '../../services/spectator-canvas';
@@ -18,12 +18,12 @@ import { SpectatorCanvasService } from '../../services/spectator-canvas';
   styleUrl: './gallery-view.css',
 })
 export class GalleryView {
-  @Input({ required: true }) state!: GameState;
+  readonly state = input.required<GameState>();
 
   protected readonly spectator = inject(SpectatorCanvasService);
 
   protected readonly drawers = computed(() =>
-    this.state.drawingOrder.filter((id) => id !== this.state.eliminated),
+    this.state().drawingOrder.filter((id) => id !== this.state().eliminated),
   );
 
   protected snapshotFor(playerId: number): string | null {

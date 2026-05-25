@@ -15,7 +15,7 @@ import { VoteResultView } from '../../components/vote-result-view/vote-result-vi
 import { GameOverView } from '../../components/game-over-view/game-over-view';
 import { ImpostorOverlay } from '../../components/impostor-overlay/impostor-overlay';
 import { DrawBroadcast, DrawCommand, GameEvent } from '../../models/game-event';
-import { RoleAssignment } from '../../models/role-assignment';
+import { PrivateMessage, RoleAssignment } from '../../models/role-assignment';
 import { AudioService } from '../../../../core/services/audio.service';
 
 /**
@@ -98,6 +98,10 @@ export class GameComponent implements OnInit, OnDestroy {
    *  En modo dev hardcoded a 42 (coincide con el guion de MockGameEventEmitter). */
   protected myPlayerId: number | null = null;
 
+  /** Voto emitido por este jugador en la fase de votación actual. Se pasa al
+   *  TieBreakView para que el impostor vea qué carta ya votó. */
+  protected myVotedPlayerId: number | null = null;
+
   /** True si no se conecta a WebSocket (sin token y sin ?dev=true). */
   notAuthenticated = false;
 
@@ -119,6 +123,11 @@ export class GameComponent implements OnInit, OnDestroy {
       this.gameState.isImpostor() &&
       (phase === 'DRAWING' || phase === 'GALLERY' || phase === 'VOTING' || phase === 'TIE_BREAK')
     );
+  });
+
+  protected readonly isLocalPlayerEliminated = computed(() => {
+    const id = this.myPlayerId;
+    return id != null && this.gameState.state().eliminatedPlayers.includes(id);
   });
 
   ngOnInit(): void {
@@ -145,6 +154,9 @@ export class GameComponent implements OnInit, OnDestroy {
       this.notAuthenticated = true;
       return;
     }
+
+    const user = this.authService.getCurrentUser();
+    if (user) this.myPlayerId = user.id;
 
     this.connectWebSocket(code, token);
   }
@@ -180,19 +192,24 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   private connectWebSocket(code: string, token: string): void {
+    console.log('[Game] connectWebSocket — WS status before connect:', this.ws.currentStatus);
     this.ws.connect({ url: '/ws', jwt: token });
     this.connectedToWs = true;
+    console.log('[Game] connectWebSocket — WS status after connect():', this.ws.currentStatus);
 
     this.ws
       .subscribe<GameEvent>(`/topic/room.${code}.game`)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((ev) => {
-        this.gameState.applyEvent(ev);
-        // Shake feedback cuando el impostor falla un intento.
-        if (ev.type === 'GUESS_ATTEMPT' && !ev.correct) {
-          this.impostorOverlay?.triggerShake();
-          this.audioService.playEffect('fail_sound', 5000); // Suena 5 segundos
-        }
+      .subscribe({
+        next: (ev) => {
+          console.log('[Game] game event received:', (ev as GameEvent & { type: string }).type, ev);
+          this.gameState.applyEvent(ev);
+          if (ev.type === 'GUESS_ATTEMPT' && !ev.correct) {
+            this.impostorOverlay?.triggerShake();
+            this.audioService.playEffect('fail_sound', 5000);
+          }
+        },
+        error: (err) => console.error('[Game] game topic error:', err),
       });
 
     this.ws
@@ -201,13 +218,18 @@ export class GameComponent implements OnInit, OnDestroy {
       .subscribe((broadcast) => this.spectator.replayBroadcast(broadcast));
 
     this.ws
-      .subscribe<RoleAssignment>('/user/queue/private')
+      .subscribe<PrivateMessage>('/user/queue/private')
       .pipe(takeUntil(this.destroy$))
-      .subscribe((msg) => {
-        if (msg.type === 'ROLE_ASSIGNMENT') {
-          this.gameState.applyRoleAssignment(msg);
-        }
-        // GuessResult del impostor: lo deja al GameStateService como mejora futura.
+      .subscribe({
+        next: (msg) => {
+          console.log('[Game] private message received:', msg.type, msg);
+          if (msg.type === 'ROLE_ASSIGNMENT') {
+            this.gameState.applyRoleAssignment(msg as RoleAssignment);
+          } else if (msg.type === 'ELO_UPDATE') {
+            this.gameState.applyEloUpdate(msg.eloChange);
+          }
+        },
+        error: (err) => console.error('[Game] private queue error:', err),
       });
   }
 
@@ -224,6 +246,7 @@ export class GameComponent implements OnInit, OnDestroy {
   /** Envía el voto al servidor. Invocado por VotingView. */
   protected sendVote(votedPlayerId: number): void {
     const code = this.route.snapshot.paramMap.get('code') ?? '';
+    this.myVotedPlayerId = votedPlayerId;
     this.ws.send(`/app/room.${code}.vote`, { votedPlayerId });
   }
 
@@ -240,12 +263,8 @@ export class GameComponent implements OnInit, OnDestroy {
     this.ws.send(`/app/room.${code}.guess`, { guess });
   }
 
-  /**
-   * Botón "jugar otra vez" en GameOverView. PENDING — Track F definirá el flujo
-   * definitivo (volver al lobby, crear nueva sala, etc.). Mientras tanto navego
-   * al home `/` para no dejar el botón sin efecto.
-   */
   protected onPlayAgain(): void {
-    this.router.navigate(['/']);
+    this.ws.disconnect();
+    this.router.navigate(['/main_menu']);
   }
 }

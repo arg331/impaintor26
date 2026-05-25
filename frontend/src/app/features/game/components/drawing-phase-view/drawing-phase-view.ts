@@ -1,12 +1,12 @@
 import {
   Component,
   EventEmitter,
-  Input,
   OnDestroy,
   OnInit,
   Output,
   computed,
   inject,
+  input,
   signal,
 } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
@@ -38,8 +38,8 @@ import { SpectatorCanvasService } from '../../services/spectator-canvas';
   styleUrl: './drawing-phase-view.css',
 })
 export class DrawingPhaseView implements OnInit, OnDestroy {
-  @Input({ required: true }) state!: GameState;
-  @Input() myPlayerId: number | null = null;
+  readonly state = input.required<GameState>();
+  readonly myPlayerId = input<number | null>(null);
 
   /** Comando de dibujo (STROKE o CLEAR) listo para reenviar al servidor. */
   @Output() drawCommand = new EventEmitter<DrawCommand>();
@@ -53,15 +53,16 @@ export class DrawingPhaseView implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   protected readonly isMyTurn = computed(() => {
-    return this.myPlayerId !== null && this.state.currentDrawerId === this.myPlayerId;
+    const pid = this.myPlayerId();
+    return pid !== null && this.state().currentDrawerId === pid;
   });
 
-  protected readonly isImpostor = computed(() => this.state.myRole === 'IMPOSTOR');
+  protected readonly isImpostor = computed(() => this.state().myRole === 'IMPOSTOR');
 
-  protected readonly canDraw = computed(() => this.isMyTurn() && this.state.myRole === 'PAINTER');
+  protected readonly canDraw = computed(() => this.isMyTurn());
 
   protected readonly drawerSnapshot = computed(() => {
-    const id = this.state.currentDrawerId;
+    const id = this.state().currentDrawerId;
     if (id === null) return null;
     return this.spectator.snapshots()[id] ?? null;
   });

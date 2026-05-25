@@ -7,9 +7,9 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.impaintor.feature.game.models.GameState;
-import com.impaintor.feature.game.models.GuessResult;
-import com.impaintor.feature.game.models.VoteResult;
+import com.impaintor.feature.game.model.GameState;
+import com.impaintor.feature.game.model.GuessResult;
+import com.impaintor.feature.game.model.VoteResult;
 
 @Service
 public class GameLogicService {
@@ -28,10 +28,8 @@ public class GameLogicService {
     public VoteResult handleVotes(GameState state, Map<Long, Long> incomingVotes) {
         // 1. Rellenar las ausencias (quien no vota, se vota a sí mismo)
         Map<Long, Long> finalVotes = new HashMap<>(incomingVotes);
-        if (state.getAlivePlayerId() != null) {
-            for (Long playerId : state.getAlivePlayerId()) {
-                finalVotes.putIfAbsent(playerId, playerId);
-            }
+        for (Long playerId : state.getAlivePlayers()) {
+            finalVotes.putIfAbsent(playerId, playerId);
         }
 
         // 2. Contar los votos
@@ -58,7 +56,7 @@ public class GameLogicService {
 
         boolean isTie = topVotedPlayers.size() > 1;
 
-        if (state.getCurrentRound() == 1) {
+        if (state.getRound() == 1) {
             if (isTie) {
                 return VoteResult.builder()
                         .nobodyEliminated(true)
@@ -128,12 +126,12 @@ public class GameLogicService {
             return result;
         }
 
-        if (result.getEliminatedPlayerId() != null && state.getAlivePlayerId() != null) {
-            state.getAlivePlayerId().remove(result.getEliminatedPlayerId());
+        if (result.getEliminatedPlayerId() != null) {
+            state.eliminatePlayer(result.getEliminatedPlayerId());
         }
 
-        if (state.getAlivePlayerId() != null && state.getAlivePlayerId().size() <= 2) {
-            if (state.getAlivePlayerId().contains(state.getImpostorId())) {
+        if (state.getAlivePlayers().size() <= 2) {
+            if (state.getAlivePlayers().contains(state.getImpostorId())) {
                 return VoteResult.builder()
                         .nobodyEliminated(result.isNobodyEliminated())
                         .isTie(result.isTie())
@@ -146,7 +144,7 @@ public class GameLogicService {
         }
 
         if (!result.isTie()) {
-            state.setCurrentRound(state.getCurrentRound() + 1);
+            state.setRound(state.getRound() + 1);
         }
 
         return result;
