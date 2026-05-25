@@ -36,7 +36,7 @@ public class MatchmakingSessionListener {
         Long userId = sessionUserMap.remove(event.getSessionId());
         if (userId == null) return;
 
-        matchmakingService.leave(userId);
+        matchmakingService.onDisconnect(userId);
         log.debug("Player {} removed from matchmaking queue on WebSocket disconnect", userId);
     }
 }

@@ -46,13 +46,26 @@ public class MatchmakingService {
     public MatchmakingStatusResponse join(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        queue.computeIfAbsent(userId, id -> new QueueEntry(id, user.getElo(), Instant.now()));
+        boolean added = queue.putIfAbsent(userId, new QueueEntry(userId, user.getElo() != null ? user.getElo() : 1000, Instant.now())) == null;
+        log.info("[MM] join userId={} elo={} added={} queueSize={}", userId, user.getElo(), added, queue.size());
         return getStatus(userId);
     }
 
+    /** Voluntary cancel — removes from queue AND pending match (player chose to stop). */
     public void leave(Long userId) {
         queue.remove(userId);
         pendingMatches.remove(userId);
+        log.info("[MM] leave userId={} queueSize={}", userId, queue.size());
+    }
+
+    /**
+     * Called on WebSocket disconnect. Removes the player from the active queue but
+     * preserves any pending match info so the polling fallback can still deliver the
+     * room code when they reconnect.
+     */
+    public void onDisconnect(Long userId) {
+        queue.remove(userId);
+        log.info("[MM] disconnect userId={} queueSize={}", userId, queue.size());
     }
 
     public MatchmakingStatusResponse getStatus(Long userId) {
@@ -76,6 +89,7 @@ public class MatchmakingService {
 
     private boolean tryFormOneMatch() {
         List<QueueEntry> sorted = new ArrayList<>(queue.values());
+        log.debug("[MM] scheduler tick — queue size={}", sorted.size());
         if (sorted.size() < MATCH_SIZE) return false;
 
         sorted.sort(Comparator.comparingInt(QueueEntry::elo));
@@ -88,6 +102,9 @@ public class MatchmakingService {
                     .mapToInt(this::searchRangeFor)
                     .min()
                     .orElse(0);
+
+            log.info("[MM] window[{}] spread={} tightestRange={} players={}", i, spread, tightestRange,
+                    window.stream().map(QueueEntry::userId).toList());
 
             if (spread <= tightestRange) {
                 window.forEach(e -> queue.remove(e.userId()));
