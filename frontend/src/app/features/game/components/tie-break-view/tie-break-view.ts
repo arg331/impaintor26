@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
+import { Component, EventEmitter, Output, computed, input, signal } from '@angular/core';
 
 import { GameState } from '../../models/game-state';
 
@@ -16,14 +16,14 @@ import { GameState } from '../../models/game-state';
   styleUrl: './tie-break-view.css',
 })
 export class TieBreakView {
-  @Input({ required: true }) state!: GameState;
-  @Input() myPlayerId: number | null = null;
+  readonly state = input.required<GameState>();
+  readonly myPlayerId = input<number | null>(null);
 
   @Output() voteMoved = new EventEmitter<number>();
 
   protected readonly myMove = signal<number | null>(null);
 
-  protected readonly isImpostor = computed(() => this.state.myRole === 'IMPOSTOR');
+  protected readonly isImpostor = computed(() => this.state().myRole === 'IMPOSTOR');
 
   protected onCardClick(playerId: number): void {
     if (!this.isImpostor()) return;

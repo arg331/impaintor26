@@ -1,7 +1,7 @@
 <div class="tie-break-view" data-testid="tie-break-phase">
   <header class="phase-header">
-    <h2>Empate — Ronda {{ state.round }}</h2>
-    <div class="timer" data-testid="timer">⏱ {{ state.timeRemainingSec }}s</div>
+    <h2>Empate — Ronda {{ state().round }}</h2>
+    <div class="timer" data-testid="timer">⏱ {{ state().timeRemainingSec }}s</div>
   </header>
 
   @if (isImpostor()) {
@@ -15,7 +15,7 @@
   }
 
   <div class="tied-players">
-    @for (entry of state.tiedPlayers; track entry.id) {
+    @for (entry of state().tiedPlayers; track entry.id) {
       <button
         class="tied-card tied"
         [class.voted]="myMove() === entry.id"

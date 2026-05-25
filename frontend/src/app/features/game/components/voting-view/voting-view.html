@@ -1,7 +1,7 @@
 <div class="voting-view" data-testid="voting-phase">
   <header class="phase-header">
-    <h2>Fase de votación — Ronda {{ state.round }}</h2>
-    <div class="timer" data-testid="timer">⏱ {{ state.timeRemainingSec }}s</div>
+    <h2>Fase de votación — Ronda {{ state().round }}</h2>
+    <div class="timer" data-testid="timer">⏱ {{ state().timeRemainingSec }}s</div>
   </header>
 
   <p class="instructions">¿Quién crees que es el impostor? Vota tocando una tarjeta.</p>
@@ -18,7 +18,7 @@
       >
         <div class="player-label">
           Jugador {{ id }}
-          @if (id === myPlayerId) {
+          @if (id === myPlayerId()) {
             <span class="self-marker" data-testid="self-marker">(Tú)</span>
           }
         </div>

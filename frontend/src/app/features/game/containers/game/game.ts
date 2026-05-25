@@ -253,12 +253,8 @@ export class GameComponent implements OnInit, OnDestroy {
     this.ws.send(`/app/room.${code}.guess`, { guess });
   }
 
-  /**
-   * Botón "jugar otra vez" en GameOverView. PENDING — Track F definirá el flujo
-   * definitivo (volver al lobby, crear nueva sala, etc.). Mientras tanto navego
-   * al home `/` para no dejar el botón sin efecto.
-   */
   protected onPlayAgain(): void {
-    this.router.navigate(['/']);
+    this.ws.disconnect();
+    this.router.navigate(['/main_menu']);
   }
 }
