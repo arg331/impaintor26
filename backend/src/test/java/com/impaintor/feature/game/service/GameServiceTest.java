@@ -41,6 +41,7 @@ class GameServiceTest {
     private RealtimePublisher realtimePublisher;
     private SimpMessagingTemplate messagingTemplate;
     private GameEndService gameEndService;
+    private GameLogicService gameLogicService;
     private ScheduledExecutorService scheduler;
     @SuppressWarnings("rawtypes")
     private ScheduledFuture scheduledFuture;
@@ -53,10 +54,11 @@ class GameServiceTest {
         realtimePublisher = mock(RealtimePublisher.class);
         messagingTemplate = mock(SimpMessagingTemplate.class);
         gameEndService = mock(GameEndService.class);
+        gameLogicService = mock(GameLogicService.class);
         scheduler = mock(ScheduledExecutorService.class);
         scheduledFuture = mock(ScheduledFuture.class);
 
-        service = new GameService(roomRepository, wordGroupRepository, realtimePublisher, messagingTemplate, gameEndService);
+        service = new GameService(roomRepository, wordGroupRepository, realtimePublisher, messagingTemplate, gameEndService, gameLogicService);
         ReflectionTestUtils.setField(service, "scheduler", scheduler);
     }
 

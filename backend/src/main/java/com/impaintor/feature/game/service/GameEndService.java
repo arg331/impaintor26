@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.impaintor.feature.game.model.GameState;
-import com.impaintor.feature.game.models.GamePlayerRecord;
-import com.impaintor.feature.game.models.GameRecord;
+import com.impaintor.feature.game.model.GamePlayerRecord;
+import com.impaintor.feature.game.model.GameRecord;
 import com.impaintor.feature.game.repository.GamePlayerRecordRepository;
 import com.impaintor.feature.game.repository.GameRecordRepository;
 import com.impaintor.feature.room.models.Room;

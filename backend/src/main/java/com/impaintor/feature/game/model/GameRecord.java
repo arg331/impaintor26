@@ -1,4 +1,4 @@
-package com.impaintor.feature.game.models;
+package com.impaintor.feature.game.model;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

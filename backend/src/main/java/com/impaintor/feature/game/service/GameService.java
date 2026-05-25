@@ -12,13 +12,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 
+import com.impaintor.feature.game.model.GalleryPhaseEvent;
 import com.impaintor.feature.game.model.GameState;
 import com.impaintor.feature.game.model.GameState.CanvasSnapshot;
-import com.impaintor.feature.game.model.GalleryPhaseEvent;
+import com.impaintor.feature.realtime.dto.outbound.GameEvent;
 import com.impaintor.feature.realtime.dto.outbound.GuessResult;
 import com.impaintor.feature.realtime.dto.outbound.RoleAssignment;
 import com.impaintor.feature.realtime.service.GameInputHandler;
@@ -28,7 +29,6 @@ import com.impaintor.feature.room.repository.RoomRepository;
 import com.impaintor.feature.user.models.User;
 import com.impaintor.feature.wordgroup.models.WordGroup;
 import com.impaintor.feature.wordgroup.repositories.WordGroupRepository;
-import com.impaintor.feature.realtime.dto.outbound.GameEvent;
 
 /**
  * Inicializa y conserva el estado en memoria de una partida por sala.
@@ -43,6 +43,7 @@ public class GameService implements GameInputHandler {
     private final RealtimePublisher realtimePublisher;
     private final SimpMessagingTemplate messagingTemplate;
     private final GameEndService gameEndService;
+    private final GameLogicService gameLogicService;
 
     private final Map<String, GameState> activeGames = new ConcurrentHashMap<>();
     private final Map<String, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
@@ -52,12 +53,14 @@ public class GameService implements GameInputHandler {
                        WordGroupRepository wordGroupRepository,
                        RealtimePublisher realtimePublisher,
                        SimpMessagingTemplate messagingTemplate,
-                       GameEndService gameEndService) {
+                       GameEndService gameEndService,
+                       GameLogicService gameLogicService) {
         this.roomRepository = roomRepository;
         this.wordGroupRepository = wordGroupRepository;
         this.realtimePublisher = realtimePublisher;
         this.messagingTemplate = messagingTemplate;
         this.gameEndService = gameEndService;
+        this.gameLogicService = gameLogicService;
     }
 
     @Transactional
@@ -400,9 +403,10 @@ public class GameService implements GameInputHandler {
         if (gs == null) return;
         synchronized (gs) {
             if (gs.getPhase() != GameState.Phase.TIE_BREAK) return;
+            com.impaintor.feature.game.model.VoteResult result = gameLogicService.handleTieBreak(gs, null);
             gs.clearVotes();
             realtimePublisher.publishGameEvent(roomCode,
-                    new GameEvent.VoteResult(gs.getImpostorId(), true, List.of()));
+                    new GameEvent.VoteResult(result.getEliminatedPlayerId(), true, List.of()));
             finishGame(roomCode, gs, Room.WinningSide.PAINTOR, Room.EndCondition.TIE_NOT_BROKEN,
                     "PAINTERS", "TIE_NOT_BROKEN");
         }
@@ -455,7 +459,7 @@ public class GameService implements GameInputHandler {
         synchronized (gs) {
             if (!impostorId.equals(gs.getImpostorId())) return;
 
-            boolean correct = guess.trim().equalsIgnoreCase(gs.getSecretWord().trim());
+            boolean correct = gameLogicService.handleImpostorGuess(gs, guess).isCorrect();
 
             if (correct) {
                 realtimePublisher.sendGuessResult(impostorId,
