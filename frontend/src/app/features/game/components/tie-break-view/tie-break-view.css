@@ -73,6 +73,11 @@
   background: #ecfdf5;
 }
 
+.vote-card.previous-vote {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
 .vote-card.disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -141,6 +146,15 @@
   border-radius: 4px;
   color: #999;
   font-size: 0.875rem;
+}
+
+.previous-vote-marker {
+  background: #f59e0b;
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .vote-marker {

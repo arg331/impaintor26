@@ -14,6 +14,7 @@
         <button
           class="vote-card"
           [class.voted]="myMove() === entry.id"
+          [class.previous-vote]="myPreviousVote() === entry.id && myMove() === null"
           [class.disabled]="myMove() !== null && myMove() !== entry.id"
           [disabled]="myMove() !== null"
           [attr.data-testid]="'tied-card-' + entry.id"
@@ -34,6 +35,9 @@
             <div class="no-drawing">(sin dibujo)</div>
           }
 
+          @if (myPreviousVote() === entry.id && myMove() === null) {
+            <div class="previous-vote-marker">← Tu voto anterior</div>
+          }
           @if (myMove() === entry.id) {
             <div class="vote-marker">✓ Tu nuevo voto</div>
           }

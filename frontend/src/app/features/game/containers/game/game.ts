@@ -98,6 +98,10 @@ export class GameComponent implements OnInit, OnDestroy {
    *  En modo dev hardcoded a 42 (coincide con el guion de MockGameEventEmitter). */
   protected myPlayerId: number | null = null;
 
+  /** Voto emitido por este jugador en la fase de votación actual. Se pasa al
+   *  TieBreakView para que el impostor vea qué carta ya votó. */
+  protected myVotedPlayerId: number | null = null;
+
   /** True si no se conecta a WebSocket (sin token y sin ?dev=true). */
   notAuthenticated = false;
 
@@ -237,6 +241,7 @@ export class GameComponent implements OnInit, OnDestroy {
   /** Envía el voto al servidor. Invocado por VotingView. */
   protected sendVote(votedPlayerId: number): void {
     const code = this.route.snapshot.paramMap.get('code') ?? '';
+    this.myVotedPlayerId = votedPlayerId;
     this.ws.send(`/app/room.${code}.vote`, { votedPlayerId });
   }
 

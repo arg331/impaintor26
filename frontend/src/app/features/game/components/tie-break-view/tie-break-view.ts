@@ -19,6 +19,7 @@ import { SpectatorCanvasService } from '../../services/spectator-canvas';
 export class TieBreakView {
   readonly state = input.required<GameState>();
   readonly myPlayerId = input<number | null>(null);
+  readonly myPreviousVote = input<number | null>(null);
 
   @Output() voteMoved = new EventEmitter<number>();
 
