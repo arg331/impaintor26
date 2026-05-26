@@ -87,6 +87,10 @@ public class GameService implements GameInputHandler {
         Collections.shuffle(shuffledPlayers);
         User impostor = shuffledPlayers.get(0);
 
+        // Shuffle again independently so the impostor's position in the drawing
+        // order is not correlated with their selection (previously always drew first).
+        Collections.shuffle(shuffledPlayers);
+
         List<Long> drawingOrder = new ArrayList<>();
         for (User player : shuffledPlayers) {
             drawingOrder.add(player.getId());
@@ -106,20 +110,19 @@ public class GameService implements GameInputHandler {
 
         activeGames.put(roomCode, gameState);
 
-        realtimePublisher.publishGameEvent(roomCode, new GameEvent.GameStart(drawingOrder, 1));
-
         room.setWordGroup(wordGroup);
         room.setSecretWord(secretWord);
         room.setHintWord(hintWord);
         room.setGameState(Room.GameState.PLAYING);
         roomRepository.save(room);
 
-        // Delay role assignments and first turn so all clients have time to navigate
-        // from the lobby to /game and re-subscribe before TURN_START arrives.
-        // Without this delay, the lobby's still-active subscription consumes TURN_START
-        // and GameComponent never sees it, causing the first drawer to be skipped.
+        // Delay GAME_START, role assignments and first turn so all clients have time
+        // to navigate from the lobby to /game and subscribe before any events arrive.
+        // GAME_START is intentionally inside the delay — if sent immediately it races
+        // the Angular route transition and clients miss it, leaving round stuck at 0.
         final List<User> playerSnapshot = List.copyOf(players);
         ScheduledFuture<?> f = scheduler.schedule(() -> {
+            realtimePublisher.publishGameEvent(roomCode, new GameEvent.GameStart(drawingOrder, 1));
             sendRoleAssignments(playerSnapshot, gameState);
             startNextTurn(roomCode);
         }, 3, TimeUnit.SECONDS);
@@ -431,6 +434,10 @@ public class GameService implements GameInputHandler {
         }
     }
 
+    // Phantom voter ID used to record the impostor's extra tie-break vote without
+    // overwriting their original vote, which stays in place unchanged.
+    private static final Long EXTRA_VOTE_ID = -1L;
+
     @Override
     public void onVoteMove(String roomCode, Long impostorId, Long targetPlayerId) {
         GameState gs = activeGames.get(roomCode);
@@ -442,7 +449,9 @@ public class GameService implements GameInputHandler {
             ScheduledFuture<?> scheduled = scheduledTasks.remove(roomCode);
             if (scheduled != null) scheduled.cancel(false);
 
-            gs.recordVote(impostorId, targetPlayerId);
+            // Extra vote: keep the impostor's original vote in place, add one fresh
+            // vote under the phantom key so any tie configuration is always breakable.
+            gs.recordVote(EXTRA_VOTE_ID, targetPlayerId);
             applyVoteResolution(roomCode, gs);
         }
     }

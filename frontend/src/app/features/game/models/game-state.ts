@@ -47,7 +47,7 @@ export interface GameState {
 
 export const INITIAL_STATE: GameState = {
   phase: 'CONNECTING',
-  round: 0,
+  round: 1,
   drawingOrder: [],
   currentDrawerId: null,
   timeRemainingSec: 0,

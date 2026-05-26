@@ -34,15 +34,13 @@
       }
     </div>
   } @else {
-    <p class="instructions">¿Quién crees que es el impostor? Vota tocando una tarjeta.</p>
-
     <div class="vote-grid">
       @for (id of votablePlayers(); track id) {
         <button
           class="vote-card"
-          [class.voted]="myVote() === id"
-          [class.disabled]="myVote() !== null && myVote() !== id"
-          [disabled]="myVote() !== null"
+          [class.voted]="mySelection() === id"
+          [class.disabled]="voteLocked() && mySelection() !== id"
+          [disabled]="voteLocked()"
           [attr.data-testid]="'vote-card-' + id"
           (click)="onVote(id)"
         >
@@ -57,15 +55,19 @@
           } @else {
             <div class="no-drawing">(sin dibujo)</div>
           }
-          @if (myVote() === id) {
-            <div class="vote-marker">✓ Tu voto</div>
+          @if (mySelection() === id) {
+            <div class="vote-marker">{{ voteLocked() ? '✓ Tu voto' : '● Seleccionado' }}</div>
           }
         </button>
       }
     </div>
 
-    @if (myVote() !== null) {
+    @if (voteLocked()) {
       <p class="confirmation">Voto registrado. Esperando al resto…</p>
+    } @else if (mySelection() !== null) {
+      <p class="instructions">Selección actual — puedes cambiar antes de que se bloquee el voto.</p>
+    } @else {
+      <p class="instructions">¿Quién crees que es el impostor? Selecciona una tarjeta.</p>
     }
   }
 </div>
