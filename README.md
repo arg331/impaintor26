@@ -28,8 +28,6 @@ ImPaintor es un juego multijugador de dibujo y deducción con roles ocultos. La 
 - [backend/](backend) contiene la API REST, la lógica de juego, WebSocket/STOMP, seguridad y persistencia.
 - [frontend/](frontend) contiene la aplicación Angular, las vistas del juego y el cliente en tiempo real.
 - [docker-compose.yml](docker-compose.yml) levanta backend, frontend, PostgreSQL y RabbitMQ.
-- [docs/](docs) guarda notas de diseño y planes de trabajo.
-- [CLAUDE.md](CLAUDE.md) recoge la especificación funcional completa.
 
 ### Backend
 
@@ -43,13 +41,6 @@ ImPaintor es un juego multijugador de dibujo y deducción con roles ocultos. La 
 - [backend/src/main/resources](backend/src/main/resources) contiene la configuración de Spring y los datos de arranque.
 - [backend/src/test/java](backend/src/test/java) reúne las pruebas automatizadas.
 
-En el motor de juego, el flujo se reparte así:
-
-- [GameService](backend/src/main/java/com/impaintor/feature/game/service/GameService.java) inicializa la partida, coordina turnos, galería, votación, desempate y reinicios de ronda.
-- [GameLogicService](backend/src/main/java/com/impaintor/feature/game/service/GameLogicService.java) resuelve las reglas: votos, empate, desempate y adivinación del impostor.
-- [GameEndService](backend/src/main/java/com/impaintor/feature/game/service/GameEndService.java) persiste el resultado final y actualiza estadísticas/ELO.
-- [GameState](backend/src/main/java/com/impaintor/feature/game/model/GameState.java) mantiene el estado de la partida activa en memoria.
-
 ### Frontend
 
 - [frontend/src/app/features/game](frontend/src/app/features/game) contiene el contenedor principal de la partida y sus vistas.
@@ -61,7 +52,7 @@ En el motor de juego, el flujo se reparte así:
 - [frontend/src/app/core](frontend/src/app/core) concentra autenticación, WebSocket y servicios globales.
 - [frontend/public](frontend/public) almacena recursos estáticos como imágenes y música.
 
-## Flujo de juego
+## Flujo de juego completo
 
 1. El jugador inicia sesión y entra al lobby de una sala o al modo ranked.
 2. Cuando el anfitrión arranca la partida, el backend elige un grupo de 3 palabras, selecciona una palabra secreta, asigna una pista al impostor y decide quién será el impostor.
@@ -95,7 +86,7 @@ En el motor de juego, el flujo se reparte así:
 Backend:
 
 1. Entra en la carpeta `backend`.
-2. Ejecuta `./mvnw spring-boot:run` en Linux/macOS o `mvnw.cmd spring-boot:run` en Windows.
+2. Ejecuta  `mvnw.cmd spring-boot:run`.
 
 Frontend:
 
