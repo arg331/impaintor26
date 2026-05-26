@@ -14,6 +14,7 @@ import { TieBreakView } from '../../components/tie-break-view/tie-break-view';
 import { VoteResultView } from '../../components/vote-result-view/vote-result-view';
 import { GameOverView } from '../../components/game-over-view/game-over-view';
 import { ImpostorOverlay } from '../../components/impostor-overlay/impostor-overlay';
+import { GameBackgroundComponent } from '../../../../shared/components/game-background/game-background.component';
 import { DrawBroadcast, DrawCommand, GameEvent } from '../../models/game-event';
 import { PrivateMessage, RoleAssignment } from '../../models/role-assignment';
 import { AudioService } from '../../../../core/services/audio.service';
@@ -41,6 +42,7 @@ import { AudioService } from '../../../../core/services/audio.service';
     VoteResultView,
     GameOverView,
     ImpostorOverlay,
+    GameBackgroundComponent,
   ],
   templateUrl: './game.html',
   styleUrl: './game.css',
