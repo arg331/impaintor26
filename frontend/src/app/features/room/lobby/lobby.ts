@@ -80,6 +80,12 @@ export class Lobby implements OnInit, OnDestroy {
           room.playersNames.map((u, index) => ({ username: u.username, isHost: index === 0 }))
         );
 
+        // Update the room config signal
+        this.roomConfig.set({
+          drawingTime: room.drawTime || 30,
+          impostorLives: room.impostorTries || 1
+        });
+
         const currentUser = this.authService.getCurrentUser();
         if (currentUser && room.playersNames.length > 0 && room.playersNames[0].username === currentUser.username) {
           this.isHost.set(true);
@@ -113,6 +119,12 @@ export class Lobby implements OnInit, OnDestroy {
               this.isHost.set(false);
             }
           }
+
+          // Update the room config signal
+          this.roomConfig.set({
+            drawingTime: room.drawTime || 30,
+            impostorLives: room.impostorTries || 1
+          });
         },
       });
 
@@ -134,6 +146,12 @@ export class Lobby implements OnInit, OnDestroy {
           if (room.gameState === 'PLAYING') {
             this.navigateToGame();
           }
+
+          // Update the room config signal
+          this.roomConfig.set({
+            drawingTime: room.drawTime || 30,
+            impostorLives: room.impostorTries || 1
+          });
         },
       });
     }, 3000);
