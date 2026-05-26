@@ -19,4 +19,6 @@ public interface WordGroupRepository extends JpaRepository<WordGroup, Long> {
     Optional<WordGroup> findRandom();
 
     long countByLanguage(String language);
+
+    long deleteBySource(String source);
 }
