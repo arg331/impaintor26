@@ -87,6 +87,11 @@ public class RoomController {
             return ResponseEntity.badRequest().body("La sala está llena");
         }
 
+        // El primer jugador en unirse es el anfitrión
+        if (room.getHostId() == null) {
+            room.setHostId(user.getId());
+        }
+
         room.getPlayersNames().add(user);
         roomRepository.save(room);
 
