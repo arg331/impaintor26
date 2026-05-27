@@ -35,8 +35,18 @@ public class RoomController {
     @Autowired
     private GameService gameService;
 
+    public static class RoomConfigDto {
+        private Integer drawingTime;
+        private Integer impostorLives;
+
+        public Integer getDrawingTime() { return drawingTime; }
+        public void setDrawingTime(Integer drawingTime) { this.drawingTime = drawingTime; }
+        public Integer getImpostorLives() { return impostorLives; }
+        public void setImpostorLives(Integer impostorLives) { this.impostorLives = impostorLives; }
+    }
+
     @PostMapping("/create")
-    public ResponseEntity<?> createRoom() {
+    public ResponseEntity<?> createRoom(@RequestBody(required = false) RoomConfigDto config) {
         Room room = new Room();
 
         Long seed = RandomGenerations.RoomRandomId();
@@ -46,9 +56,19 @@ public class RoomController {
         room.setMode(Room.Mode.CUSTOM);
         room.setGameState(Room.GameState.WAITING);
 
+        if (config != null) {
+            if (config.getDrawingTime() != null) {
+                room.setDrawTime(config.getDrawingTime());
+            }
+            if (config.getImpostorLives() != null) {
+                room.setImpostorTries(config.getImpostorLives());
+            }
+        }
+
         Room saved = roomRepository.save(room);
         return ResponseEntity.ok(saved);
     }
+
 
     @PostMapping("/{code}/join")
     public ResponseEntity<?> joinRoom(@PathVariable String code, @RequestBody User user) {
