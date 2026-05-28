@@ -44,7 +44,7 @@ public class GameHistoryController {
     public ResponseEntity<Page<GameHistoryEntryResponse>> history(
             @AuthenticationPrincipal AppUserDetails currentUser,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size
+            @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<GamePlayerRecord> records = gamePlayerRecordRepository.findByUser_Id(currentUser.getId(), pageable);
