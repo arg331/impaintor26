@@ -1,0 +1,75 @@
+<div class="tie-break-view" data-testid="tie-break-phase">
+  <header class="phase-header">
+    <h2>Empate — Ronda {{ state().round }}</h2>
+    <div class="timer" data-testid="timer" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.3rem;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" style="width: 1rem; height: 1rem;">
+        <line x1="10" x2="14" y1="2" y2="2"></line>
+        <line x1="12" x2="12" y1="14" y2="11"></line>
+        <circle cx="12" cy="14" r="8"></circle>
+      </svg>
+      {{ state().timeRemainingSec }}s
+    </div>
+  </header>
+
+  @if (isImpostor()) {
+    <p class="instructions impostor-prompt" data-testid="impostor-prompt">
+      Tienes un voto extra. Úsalo para romper el empate. Si no actúas, serás expulsado.
+    </p>
+
+    <div class="vote-grid">
+      @for (entry of state().tiedPlayers; track entry.id) {
+        <button
+          class="vote-card"
+          [class.voted]="myMove() === entry.id"
+          [class.disabled]="myMove() !== null && myMove() !== entry.id"
+          [disabled]="myMove() !== null"
+          [attr.data-testid]="'tied-card-' + entry.id"
+          (click)="onCardClick(entry.id)"
+        >
+          <div class="player-label">
+            {{ playerNames()[entry.id] || 'Jugador ' + entry.id }}
+            @if (entry.id === myPlayerId()) {
+              <span class="self-marker">(Tú)</span>
+            }
+          </div>
+
+          <div class="vote-count-badge">{{ entry.votes }} voto(s)</div>
+
+          @if (snapshotFor(entry.id); as src) {
+            <img [src]="src" alt="Dibujo del jugador {{ entry.id }}" class="vote-thumb" />
+          } @else {
+            <div class="no-drawing">(sin dibujo)</div>
+          }
+
+          @if (myMove() === entry.id) {
+            <div class="vote-marker">✓ Voto extra</div>
+          }
+        </button>
+      }
+    </div>
+
+    @if (myMove() !== null) {
+      <p class="confirmation">Voto extra enviado. Esperando resultado…</p>
+    }
+  } @else {
+    <p class="instructions waiting-prompt" data-testid="waiting-prompt">
+      Esperando al impostor…
+    </p>
+
+    <div class="vote-grid readonly">
+      @for (entry of state().tiedPlayers; track entry.id) {
+        <div class="vote-card tied-readonly" [attr.data-testid]="'tied-card-' + entry.id">
+          <div class="player-label">{{ playerNames()[entry.id] || 'Jugador ' + entry.id }}</div>
+
+          <div class="vote-count-badge">{{ entry.votes }} voto(s)</div>
+
+          @if (snapshotFor(entry.id); as src) {
+            <img [src]="src" alt="Dibujo del jugador {{ entry.id }}" class="vote-thumb" />
+          } @else {
+            <div class="no-drawing">(sin dibujo)</div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

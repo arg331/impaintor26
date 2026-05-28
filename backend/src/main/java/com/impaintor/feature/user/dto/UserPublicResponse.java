@@ -1,0 +1,13 @@
+package com.impaintor.feature.user.dto;
+
+public record UserPublicResponse(
+    Long id,
+    String username,
+    Integer elo,
+    Integer gamesPlayed,
+    Integer gamesWon,
+    String avatarData,
+    String countryCode,
+    String biography
+) {
+}

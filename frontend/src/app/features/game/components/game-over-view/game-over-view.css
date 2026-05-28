@@ -1,0 +1,126 @@
+.game-over-view {
+  max-width: 600px;
+  margin: 2rem auto;
+  text-align: center;
+  font-family: 'Nunito', sans-serif;
+  color: #fdf5e6;
+}
+
+.winner-banner {
+  padding: 2rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.winner-banner.victory {
+  background: rgba(74, 124, 89, 0.15);
+  border: 2px solid #4a7c59;
+  box-shadow: 0 0 15px rgba(74, 124, 89, 0.3);
+}
+
+.winner-banner.defeat {
+  background: rgba(124, 58, 58, 0.15);
+  border: 2px solid #7c3a3a;
+  box-shadow: 0 0 15px rgba(124, 58, 58, 0.3);
+}
+
+.winner-banner.victory h2 {
+  color: #6fcf97;
+  text-shadow: 0 0 10px rgba(111, 207, 151, 0.4);
+}
+
+.winner-banner.defeat h2 {
+  color: #eb5757;
+  text-shadow: 0 0 10px rgba(235, 87, 87, 0.4);
+}
+
+.winner-banner h2 {
+  margin: 0 0 0.25rem 0;
+  font-family: 'MedievalSharp', 'Cinzel', Georgia, serif;
+  font-size: 2.2rem;
+  letter-spacing: 0.04em;
+}
+
+.winner-subtitle {
+  font-family: 'MedievalSharp', 'Cinzel', Georgia, serif;
+  font-size: 1.15rem;
+  color: #f5e6c8;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: 0.02em;
+}
+
+.winner-banner .reason {
+  margin: 0;
+  color: #d4b896;
+  font-family: 'Kalam', 'Nunito', cursive, sans-serif;
+  font-size: 0.95rem;
+}
+
+.reveal {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0 auto 1.5rem auto;
+  max-width: 480px;
+  text-align: left;
+}
+
+.reveal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.55rem 0.9rem;
+  background: rgba(46, 21, 5, 0.55);
+  border-radius: 6px;
+  border: 1px solid rgba(92, 58, 30, 0.5);
+  margin: 0;
+}
+
+.reveal-row dt {
+  font-weight: 600;
+  color: #7a5530;
+  font-size: 0.9rem;
+}
+
+.reveal-row dd {
+  margin: 0;
+  color: #fdf5e6;
+  font-weight: 600;
+}
+
+.reveal-row dd.elo-positive {
+  color: #52b788;
+  font-weight: 700;
+}
+
+.reveal-row dd.elo-negative {
+  color: #e84545;
+  font-weight: 700;
+}
+
+.play-again {
+  background: transparent;
+  color: #c9a86c;
+  border: 2px solid #5c3a1e;
+  padding: 0.75rem 2.5rem;
+  border-radius: 4px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  letter-spacing: 0.03em;
+}
+
+.play-again:hover {
+  background: rgba(201, 168, 108, 0.1);
+  transform: translateY(-1px);
+}
+
+.play-again:active {
+  transform: translateY(0);
+}
+
+.no-game-over {
+  padding: 2rem;
+  color: #7a5530;
+}

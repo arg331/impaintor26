@@ -1,8 +1,19 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/impaintordb
-    username: impaintor
-    password: impaintor_pass
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:mem:impaintor;DB_CLOSE_DELAY=-1;MODE=PostgreSQL}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+  mail:
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SMTP_AUTH:true}
+          starttls:
+            enable: ${SMTP_STARTTLS:true}
   jpa:
     hibernate:
       ddl-auto: update
@@ -11,7 +22,37 @@ spring:
       hibernate:
         format_sql: true
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:impaintor}
+    password: ${SPRING_RABBITMQ_PASSWORD:impaintor}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+# Configuración JWT compartida por Track A (JwtService) y Track D (JwtTokenValidator)
+# para garantizar que firman/validan con la misma clave.
+jwt:
+  secret: ${IMPAINTOR_JWT_SECRET:dev-secret-change-me-dev-secret-change-me-dev-secret}
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}   # 24h por defecto
+
+impaintor:
+  mail:
+    from: ${SMTP_FROM:}
+  reset:
+    base-url: ${PASSWORD_RESET_BASE_URL:http://localhost:4200/reset-password}
+    token-ttl-minutes: ${PASSWORD_RESET_TTL_MINUTES:30}
+  realtime:
+    broker:
+      mode: ${REALTIME_BROKER_MODE:simple}        # relay | simple
+      relay-host: ${SPRING_RABBITMQ_HOST:localhost}
+      relay-port: ${REALTIME_RELAY_PORT:61613}    # STOMP port on RabbitMQ
+      relay-login: ${SPRING_RABBITMQ_USERNAME:impaintor}
+      relay-passcode: ${SPRING_RABBITMQ_PASSWORD:impaintor}
+    jwt:
+      # Reutiliza el mismo secret raíz que Track A para que ambos firmen/validen igual.
+      secret: ${jwt.secret}
+      issuer: impaintor
+    websocket:
+      endpoint: /ws
+      allowed-origins: ${REALTIME_ALLOWED_ORIGINS:http://localhost:4200,http://frontend}

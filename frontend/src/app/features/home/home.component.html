@@ -1,0 +1,76 @@
+<!--
+  HomeComponent — Template principal de la pantalla Home.
+  Estructura semántica HTML5 para cumplir ISO 25010 (Usabilidad, Accesibilidad).
+
+  Partículas decorativas de fondo simulan el ambiente de un estudio de artista.
+-->
+<div class="home-page" role="main">
+
+  <!-- Fondo rústico y partículas (Compartido) -->
+  <app-game-background />
+
+  <button
+    class="settings-gear-btn"
+    type="button"
+    aria-label="Ir al perfil"
+    title="Perfil"
+    (click)="goToProfile()"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.35rem; height: 1.35rem;" aria-hidden="true">
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  </button>
+
+  <!-- Botón de información del juego -->
+  <button
+    class="info-btn"
+    type="button"
+    aria-label="Cómo jugar"
+    title="Cómo jugar"
+    (click)="showInfo.set(true)"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"
+         style="width:1.35rem;height:1.35rem;" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 16v-4"/>
+      <path d="M12 8h.01"/>
+    </svg>
+  </button>
+
+
+  <!-- Tarjeta principal (pergamino) -->
+  <main class="home-card" aria-label="Menú principal de Impaintor">
+
+    <!-- Logo / título del juego -->
+    <div class="game-logo" aria-label="Logotipo Impaintor">
+      <span class="logo-text">Impaintor</span>
+      <span class="logo-tagline">el juego del pintor impostor</span>
+    </div>
+
+
+
+    <!-- Banner de bienvenida personalizado -->
+    <app-welcome-banner />
+
+    <!-- Menú de opciones de juego -->
+    <app-game-menu (actionSelected)="onGameAction($event)" />
+
+    <!-- Pie de página dentro de la tarjeta -->
+    <app-home-footer />
+
+  </main>
+
+  @if (showPopup()) {
+    <app-popup
+      [title]="popupTitle()"
+      [message]="popupMessage()"
+      (close)="showPopup.set(false)">
+    </app-popup>
+  }
+
+  @if (showInfo()) {
+    <app-info-popup (close)="showInfo.set(false)"></app-info-popup>
+  }
+</div>

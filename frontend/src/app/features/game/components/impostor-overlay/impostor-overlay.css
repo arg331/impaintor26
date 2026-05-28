@@ -1,0 +1,314 @@
+/* ============================================================
+   ImpostorOverlay — 2I.8
+   Floating persistent panel visible across all game phases.
+   ============================================================ */
+
+:host {
+  /* No layout: the overlay positions itself in the viewport */
+  display: contents;
+}
+
+/* ── Overlay wrapper ─────────────────────────────────────────── */
+.impostor-overlay {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+
+  width: 300px;
+
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,0.01) 0px,
+      rgba(255,255,255,0.01) 1px,
+      transparent 1px,
+      transparent 28px
+    ),
+    linear-gradient(160deg, #2e1505 0%, #3d1f08 30%, #2a1203 70%, #1e0c02 100%);
+  border: 2px solid #5c3a1e;
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 3px #1a0e05,
+    0 0 0 5px #3d2208,
+    0 12px 32px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 200, 100, 0.08);
+
+  color: #f5e6c8;
+  font-family: 'Kalam', 'Nunito', cursive, sans-serif;
+
+  /* Smooth entrance */
+  animation: slide-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transition:
+    width 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+/* Minimized state */
+.impostor-overlay.minimized {
+  width: 220px;
+}
+
+/* Out-of-lives state — red border pulse */
+.impostor-overlay.out-of-lives {
+  border-color: #7c3a3a;
+  box-shadow:
+    0 0 0 3px #1a0e05,
+    0 0 0 5px #5c2222,
+    0 12px 32px rgba(124, 58, 58, 0.45),
+    inset 0 1px 0 rgba(255, 100, 100, 0.08);
+  animation: pulse-red 2s ease infinite;
+}
+
+/* Shake feedback on wrong guess */
+.impostor-overlay.shake {
+  animation: shake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+.overlay-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem 0.6rem;
+  border-bottom: 1px solid #5c3a1e;
+  cursor: default;
+}
+
+.overlay-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #c9a86c;
+}
+
+.overlay-title {
+  font-family: 'MedievalSharp', 'Cinzel', Georgia, serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  color: #f5e6c8;
+  text-shadow: 1px 1px 0 #3a1a00;
+  flex: 1;
+}
+
+.minimize-btn {
+  background: rgba(201, 168, 108, 0.1);
+  border: 1px solid #5c3a1e;
+  border-radius: 6px;
+  color: #c9a86c;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer !important;
+  transition:
+    background 0.2s,
+    transform 0.15s;
+}
+
+.minimize-btn:hover {
+  background: rgba(201, 168, 108, 0.25);
+  transform: scale(1.1);
+  color: #f5e6c8;
+}
+
+/* ── Body ────────────────────────────────────────────────────── */
+.overlay-body {
+  padding: 0.9rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* ── Hint ────────────────────────────────────────────────────── */
+.hint-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.hint-label,
+.lives-label,
+.guess-label {
+  font-family: 'MedievalSharp', 'Cinzel', serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #c9a86c;
+}
+
+.hint-value {
+  font-family: 'MedievalSharp', 'Cinzel', Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #f5a623;
+  text-shadow: 0 0 12px rgba(245, 166, 35, 0.5), 1px 1px 0 #1a0e05;
+  letter-spacing: 0.03em;
+  word-break: break-word;
+}
+
+/* ── Lives ───────────────────────────────────────────────────── */
+.lives-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.lives-hearts {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  min-height: 1.6rem;
+}
+
+.heart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: heart-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.no-lives {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: 'MedievalSharp', 'Cinzel', serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #eb5757;
+}
+
+/* ── Guess input ─────────────────────────────────────────────── */
+.guess-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.guess-input-row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.guess-input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1.5px solid #5c3a1e;
+  border-radius: 6px;
+  color: #f5e6c8;
+  font-family: 'Kalam', 'Nunito', cursive, sans-serif;
+  font-size: 0.875rem;
+  padding: 0.45rem 0.7rem;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
+}
+
+.guess-input::placeholder {
+  color: #8b6040;
+  font-style: italic;
+}
+
+.guess-input:focus {
+  border-color: #c9a86c;
+  background: rgba(0, 0, 0, 0.45);
+  box-shadow: 0 0 0 3px rgba(201, 168, 108, 0.2);
+}
+
+.guess-input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed !important;
+}
+
+.guess-btn {
+  background: #c9a86c;
+  border: none;
+  border-radius: 6px;
+  color: #1a0e05;
+  font-family: 'MedievalSharp', 'Cinzel', serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer !important;
+  box-shadow: 0 4px 10px rgba(201, 168, 108, 0.25);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s,
+    background 0.2s,
+    opacity 0.2s;
+  white-space: nowrap;
+}
+
+.guess-btn:hover:not(:disabled) {
+  background: #e0c28b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(201, 168, 108, 0.4);
+}
+
+.guess-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.guess-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed !important;
+}
+
+.no-lives-msg {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #eb5757;
+  font-style: italic;
+}
+
+/* ── Animations ──────────────────────────────────────────────── */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%       { transform: translateX(-8px); }
+  30%       { transform: translateX(7px); }
+  45%       { transform: translateX(-6px); }
+  60%       { transform: translateX(5px); }
+  75%       { transform: translateX(-3px); }
+  90%       { transform: translateX(2px); }
+}
+
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 0 3px #1a0e05, 0 0 0 5px #5c2222, 0 12px 32px rgba(124, 58, 58, 0.45); }
+  50%       { box-shadow: 0 0 0 3px #1a0e05, 0 0 0 5px #7c3a3a, 0 12px 40px rgba(124, 58, 58, 0.7); }
+}
+
+@keyframes heart-pop {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .impostor-overlay {
+    width: calc(100vw - 2rem);
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+  }
+  .impostor-overlay.minimized {
+    width: calc(100vw - 2rem);
+  }
+}
