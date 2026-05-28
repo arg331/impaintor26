@@ -7,7 +7,7 @@ ImPaintor es un juego multijugador de dibujo y deducción con roles ocultos. La 
 
 ## Equipo
 
-- Líder: Abel Rodríguez Gutiérrez
+- Lider: Abel Rodríguez Gutiérrez
 - Juan Francisco Escobosa Brocal
 - María López Espinosa
 - Victor Vallejo Uroz
