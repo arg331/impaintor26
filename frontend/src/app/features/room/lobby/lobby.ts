@@ -22,6 +22,7 @@ interface RoomDetails {
   gameState: 'WAITING' | 'PLAYING' | 'FINISHED';
   impostorTries: number | null;
   drawTime: number | null;
+  hostId: number | null;
   playersNames: { id: number; username: string; avatarData?: string }[];
 }
 
@@ -75,11 +76,12 @@ export class Lobby implements OnInit, OnDestroy {
       next: (room) => {
         if (room.size) this.roomSize.set(room.size);
 
-        // Map backend User objects to lobby Player interface. The creator/first to join is host.
+        // Map backend User objects to lobby Player interface.
+        // The host is determined by the persistent hostId from the backend.
         this.players.set(
-          room.playersNames.map((u, index) => ({ 
+          room.playersNames.map((u) => ({ 
             username: u.username, 
-            isHost: index === 0,
+            isHost: u.id === room.hostId,
             avatarUrl: u.avatarData
           }))
         );
@@ -91,7 +93,7 @@ export class Lobby implements OnInit, OnDestroy {
         });
 
         const currentUser = this.authService.getCurrentUser();
-        if (currentUser && room.playersNames.length > 0 && room.playersNames[0].username === currentUser.username) {
+        if (currentUser && room.hostId === currentUser.id) {
           this.isHost.set(true);
         }
 
@@ -113,15 +115,15 @@ export class Lobby implements OnInit, OnDestroy {
         next: (room) => {
           if (room.playersNames) {
             this.players.set(
-              room.playersNames.map((u: any, index: number) => ({ 
+              room.playersNames.map((u: any) => ({ 
                 username: u.username, 
-                isHost: index === 0,
+                isHost: u.id === room.hostId,
                 avatarUrl: u.avatarData
               }))
             );
 
             const currentUser = this.authService.getCurrentUser();
-            if (currentUser && room.playersNames.length > 0 && room.playersNames[0].username === currentUser.username) {
+            if (currentUser && room.hostId === currentUser.id) {
               this.isHost.set(true);
             } else {
               this.isHost.set(false);

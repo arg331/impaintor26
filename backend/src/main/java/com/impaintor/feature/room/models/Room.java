@@ -51,6 +51,9 @@ public class Room {
     @Column(name = "size")
     private Integer size;
 
+    @Column(name = "host_id")
+    private Long hostId;
+
     @Column(name="impostor_tries")
     private Integer impostorTries;
 
@@ -184,6 +187,14 @@ public class Room {
 
     public void setSize(Integer size) {
         this.size = size;
+    }
+
+    public Long getHostId() {
+        return hostId;
+    }
+
+    public void setHostId(Long hostId) {
+        this.hostId = hostId;
     }
 
     public WordGroup getWordGroup() {
