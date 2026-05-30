@@ -6,15 +6,15 @@
 ImPaintor es un juego multijugador de dibujo y deducción con roles ocultos. La partida gira alrededor de una palabra secreta que solo conocen los pintores, mientras que un jugador actúa como impostor e intenta que no lo descubran. La partida termina cuando el impostor adivina la palabra, es echado por votación o falla al adivinar.
 
 ## Equipo
-
-- Lider: Abel Rodríguez Gutiérrez
-- Juan Francisco Escobosa Brocal
-- María López Espinosa
-- Victor Vallejo Uroz
-- Javier Saiz Gomez
-- José Esteban Pérez González
-- Teo Zaitegui Jódar
-
+| Rol             | Nombre                          | Usuario        |
+|-----------------|---------------------------------|----------------|
+| Jefe de Proyecto| Abel Rodríguez Gutiérrez        | @arg331        |
+|                 | Juan Francisco Escobosa Brocal  | @Juanfran514   |
+|                 | María López Espinosa            | @ualmle048     |
+|                 | Victor Vallejo Uroz             | @vvu981        |
+|                 | Javier Saiz Gomez               | @ualjsg415     |
+|                 | José Esteban Pérez González     | @jpg486-ual    |
+|                 | Teo Zaitegui Jódar              | @zzzaitegui    |
 ## Términos
 
 - Pintor: jugador que conoce la palabra secreta y debe dibujar algo relacionado con ella.
